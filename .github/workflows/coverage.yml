@@ -19,21 +19,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: NPM Audit
         run: npx audit-ci
 
       - name: Install Node Modules
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Report Coverage
         uses: paambaati/codeclimate-action@v5.0.0
         env:
           CC_TEST_REPORTER_ID: 760097cb88b4c685dce427cf94a8e12a5f082774d06b4f4f5daef839ffc07821
         with:
-          coverageCommand: npm run lcov
+          coverageCommand: pnpm run lcov

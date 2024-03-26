@@ -31,20 +31,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18.x
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: NPM Audit
         run: npx audit-ci
 
       - name: Install Node Modules
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Build Docs
-        run: npm run generate-docs
+        run: pnpm run generate-docs
 
       - name: Setup Pages
         uses: actions/configure-pages@v3
