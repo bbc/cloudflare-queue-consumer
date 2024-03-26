@@ -1,0 +1,84 @@
+{
+  "name": "cloudflare-queue-producer",
+  "version": "0.0.0",
+  "description": "Build CloudFlare Queue applications without the boilerplate",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bbc/cloudflare-queue-producer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bbc/cloudflare-queue-producer/issues"
+  },
+  "homepage": "https://bbc.github.io/cloudflare-queue-producer/",
+  "keywords": [
+    "sqs",
+    "queue",
+    "consumer"
+  ],
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "provenance": true
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "require": "./dist/cjs/index.js",
+      "import": "./dist/esm/index.js",
+      "default": "./dist/esm/index.js"
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "clean": "rm -fr dist/*",
+    "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json",
+    "build": "npm run clean && npm run compile",
+    "watch": "tsc --watch",
+    "prepublishOnly": "npm run build",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --log-level warn --write \"**/*.{js,json,jsx,md,ts,tsx,html}\"",
+    "format:check": "prettier --check \"**/*.{js,json,jsx,md,ts,tsx,html}\"",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "posttest": "npm run lint && npm run format:check",
+    "generate-docs": "typedoc"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.25",
+    "eslint": "^8.57.0",
+    "eslint-config-iplayer": "^9.2.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "typedoc": "^0.25.12",
+    "typescript": "^5.4.2"
+  },
+  "dependencies": {
+    "debug": "^4.3.4"
+  },
+  "eslintConfig": {
+    "extends": [
+      "iplayer/base",
+      "iplayer/ts",
+      "prettier"
+    ],
+    "parserOptions": {
+      "sourceType": "module"
+    },
+    "rules": {
+      "@typescript-eslint/naming-convention": [
+        "error",
+        {
+          "selector": "variable",
+          "format": [
+            "camelCase",
+            "UPPER_CASE",
+            "PascalCase"
+          ],
+          "leadingUnderscore": "allow"
+        }
+      ]
+    }
+  }
+}

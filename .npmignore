@@ -1,0 +1,9 @@
+node_modules
+coverage
+*.log
+.vscode
+examples
+test
+public
+.nyc_output
+scripts
