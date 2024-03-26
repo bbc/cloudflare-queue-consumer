@@ -21,7 +21,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         with:
-          path-to-signatures: 'cloudflare-queue-producer/v1/cla.json'
+          path-to-signatures: 'cloudflare-queue-consumer/v1/cla.json'
           remote-organization-name: 'bbc'
           remote-repository-name: 'cla-signatures'
           path-to-document: 'https://bbc.github.io/cla-signatures/cla/v1/cla.html'

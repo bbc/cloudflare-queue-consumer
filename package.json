@@ -1,15 +1,15 @@
 {
-  "name": "@bbc/cloudflare-queue-producer",
+  "name": "@bbc/cloudflare-queue-consumer",
   "version": "0.0.0",
   "description": "Build CloudFlare Queue applications without the boilerplate",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bbc/cloudflare-queue-producer.git"
+    "url": "git+https://github.com/bbc/cloudflare-queue-consumer.git"
   },
   "bugs": {
-    "url": "https://github.com/bbc/cloudflare-queue-producer/issues"
+    "url": "https://github.com/bbc/cloudflare-queue-consumer/issues"
   },
-  "homepage": "https://bbc.github.io/cloudflare-queue-producer/",
+  "homepage": "https://bbc.github.io/cloudflare-queue-consumer/",
   "keywords": [
     "sqs",
     "queue",

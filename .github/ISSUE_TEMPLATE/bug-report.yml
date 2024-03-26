@@ -8,13 +8,13 @@ body:
       value: |
         Thank you for reporting an issue!
 
-        This issue tracker is for reporting reproducible bugs or regression's found in this package, if you have a question or feature request, please report it within the [Discussions tab](https://github.com/bbc/cloudflare-queue-producer/discussions) instead.
+        This issue tracker is for reporting reproducible bugs or regression's found in this package, if you have a question or feature request, please report it within the [Discussions tab](https://github.com/bbc/cloudflare-queue-consumer/discussions) instead.
 
         Before submitting a new bug/issue, please check the links below to see if there is a solution or question posted there already:
 
-         - [Discussions](https://github.com/bbc/cloudflare-queue-producer/discussions)
-         - [Open Issues](https://github.com/bbc/cloudflare-queue-producer/issues?q=is%3Aopen+is%3Aissue)
-         - [Closed Issues](https://github.com/bbc/cloudflare-queue-producer/issues?q=is%3Aissue+is%3Aclosed)
+         - [Discussions](https://github.com/bbc/cloudflare-queue-consumer/discussions)
+         - [Open Issues](https://github.com/bbc/cloudflare-queue-consumer/issues?q=is%3Aopen+is%3Aissue)
+         - [Closed Issues](https://github.com/bbc/cloudflare-queue-consumer/issues?q=is%3Aissue+is%3Aclosed)
 
         The more information you fill in, the better the community can help you.
   - type: textarea
@@ -32,7 +32,7 @@ body:
         Please add a link to a minimal reproduction.
         Note:
         - Please keep your example as simple and reproduceable as possible, try leaving out dependencies that are not required for reproduction.
-        - To create a shareable code example for web, you can use Stackblitz (https://stackblitz.com/edit/cloudflare-queue-producer-starter).
+        - To create a shareable code example for web, you can use Stackblitz (https://stackblitz.com/edit/cloudflare-queue-consumer-starter).
         - Please make sure the example is complete and runnable - e.g. avoid localhost URLs.
       placeholder: |
         e.g. Code Sandbox, Stackblitz, Expo Snack or TypeScript playground

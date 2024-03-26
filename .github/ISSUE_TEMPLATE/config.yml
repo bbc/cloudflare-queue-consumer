@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Feature Requests & Questions
-    url: https://github.com/bbc/cloudflare-queue-producer/discussions
+    url: https://github.com/bbc/cloudflare-queue-consumer/discussions
     about: Please ask and answer questions here.
