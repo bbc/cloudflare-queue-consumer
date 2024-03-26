@@ -7,3 +7,6 @@ test
 public
 .nyc_output
 scripts
+.*
+renovate.json
+typedoc.json
