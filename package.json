@@ -17,7 +17,7 @@
   ],
   "license": "Apache-2.0",
   "publishConfig": {
-    "provenance": true
+    "provenance": false
   },
   "type": "module",
   "exports": {
