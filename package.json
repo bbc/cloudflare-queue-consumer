@@ -1,5 +1,5 @@
 {
-  "name": "cloudflare-queue-producer",
+  "name": "@bbc/cloudflare-queue-producer",
   "version": "0.0.0",
   "description": "Build CloudFlare Queue applications without the boilerplate",
   "repository": {
