@@ -32,7 +32,9 @@ export type CloudFlareResultInfo = {
 export type PullMessagesResponse = {
   errors: CloudFlareError[];
   messages: CloudFlareError[];
-  result: Message[];
+  result: {
+    messages: Message[];
+  };
   success: boolean;
   result_info: CloudFlareResultInfo;
 };

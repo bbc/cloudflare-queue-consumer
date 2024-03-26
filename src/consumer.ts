@@ -104,7 +104,13 @@ export class Consumer extends TypedEventEmitter {
         queueId: this.queueId,
       });
 
-      const messages = response.result;
+      if (!response.success) {
+        this.emit("error", new Error("Failed to pull messages"));
+        this.isPolling = false;
+        return;
+      }
+
+      const { messages } = response.result;
 
       if (!messages || messages.length === 0) {
         this.emit("empty");
@@ -119,6 +125,7 @@ export class Consumer extends TypedEventEmitter {
         this.emit("message_received", message);
         try {
           const result = await this.handleMessage(message);
+          logger.debug("message_processed", { result });
           if (result) {
             successfulMessages.push(message.lease_id);
             this.emit("message_processed", message);
