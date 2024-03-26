@@ -20,6 +20,7 @@ export async function queuesClient<T = unknown>({
   body,
   accountId,
   queueId,
+  signal,
 }): Promise<T> {
   const { QUEUES_API_TOKEN } = getCredentials();
 
@@ -32,6 +33,7 @@ export async function queuesClient<T = unknown>({
         authorization: `Bearer ${QUEUES_API_TOKEN}`,
       },
       body: JSON.stringify(body),
+      signal,
     },
   );
 
