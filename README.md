@@ -9,6 +9,8 @@ Build CloudFlare Queues applications without the boilerplate. Just define an asy
 
 Based on [sqs-consumer](https://github.com/bbc/sqs-consumer).
 
+> **Note:** This package is still in development and should be used with caution.
+
 ## Installation
 
 To install this package, simply enter the following command into your terminal (or the variant of whatever package manager you are using):

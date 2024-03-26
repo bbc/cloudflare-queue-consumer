@@ -1,3 +1,2 @@
-export function consumer() {
-  console.log("Hello World!");
-}
+export { Consumer } from "./consumer.js";
+export * from "./types.js";
