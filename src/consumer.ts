@@ -18,7 +18,6 @@ import {
   TimeoutError,
 } from "./errors.js";
 
-// TODO: Document how to use this in the README
 /**
  * [Usage](https://bbc.github.io/cloudflare-queue-consumer/index.html#usage)
  */
@@ -366,8 +365,7 @@ export class Consumer extends TypedEventEmitter {
     retries: Message[],
   ): Promise<AckMessageResponse> {
     try {
-      // TODO: this is pretty hacky
-      // TODO: This doesn't appear to be acknowledging correctly....
+      // TODO: this is pretty hacky, is there a better way to do this?
       const retriesWithDelay = retries.map((message) => ({
         ...message,
         delay_seconds: this.retryMessageDelay,
