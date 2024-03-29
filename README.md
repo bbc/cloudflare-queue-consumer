@@ -5,7 +5,7 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/a0fcd77021e4f54ffdd4/maintainability)](https://codeclimate.com/github/bbc/cloudflare-queue-consumer/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/a0fcd77021e4f54ffdd4/test_coverage)](https://codeclimate.com/github/bbc/cloudflare-queue-consumer/test_coverage)
 
-Build CloudFlare Queues applications without the boilerplate. Just define an async function that handles the message processing.
+Build [Cloudflare Queues](https://developers.cloudflare.com/queues/) applications without the boilerplate. Just define an async function that handles the message processing.
 
 Based on [sqs-consumer](https://github.com/bbc/sqs-consumer).
 
@@ -26,21 +26,21 @@ Visit [https://bbc.github.io/cloudflare-queue-consumer/](https://bbc.github.io/c
 ## Usage
 
 ```js
-import { Consumer } from "cloudflare-queue-consumer";
+import { Consumer } from "@bbc/cloudflare-queue-consumer";
 
 const consumer = new Consumer({
-  accountId: process.env.ACCOUNT_ID, // Your CloudFlare account ID
+  accountId: process.env.ACCOUNT_ID, // Your Cloudflare account ID
   queueId: process.env.QUEUE_ID, // The Queue ID that you want to use.
   handleMessage: async (message) => {
     // Your message handling code...
   },
 });
 
-app.on("error", (err) => {
+consumer.on("error", (err) => {
   console.error(err.message);
 });
 
-app.on("processing_error", (err) => {
+consumer.on("processing_error", (err) => {
   console.error(err.message);
 });
 
@@ -49,7 +49,7 @@ consumer.start();
 
 Some implementation notes:
 
-- Pull consumers are designed to use a "short polling" approach, this means that the API from CloudFlare will respond immediately with any messages that are available, or an empty response if there are no messages available, this is different from SQS which will wait an amount of time before responding with an empty response.
+- [Pull consumers](https://developers.cloudflare.com/queues/reference/pull-consumers/) are designed to use a "short polling" approach, this means that the API from Cloudflare will respond immediately with any messages that are available, or an empty response if there are no messages available, this is different from SQS which will wait an amount of time before responding with an empty response.
 - `handleMessage` will send one message to the handler at a time, if you would prefer to receive multiple messages at once, use the `handleMessageBatch` method instead.
   - It is important to await any processing that you are doing to ensure that the next action only happens after your processing has completed.
   - By default, messages that are sent to the functions will be considered as processed if they return without an error.
@@ -61,7 +61,7 @@ Some implementation notes:
 
 ### Credentials
 
-In order to authenticate with the CloudFlare API, you will need to create an API token with read and write access to CloudFlare Queues, more information can be found [here](https://developers.cloudflare.com/queues/reference/pull-consumers/#create-api-tokens).
+In order to authenticate with the Cloudflare API, you will need to create an API token with read and write access to Cloudflare Queues, more information can be found [here](https://developers.cloudflare.com/queues/reference/pull-consumers/#create-api-tokens).
 
 Copy that token and set it as the value for an environment variable named `QUEUES_API_TOKEN`.
 
@@ -83,7 +83,7 @@ Start polling the queue for messages.
 
 Stop polling the queue for messages. [You can find the options definition here](https://bbc.github.io/cloudflare-queue-consumer/interfaces/StopOptions.html).
 
-By default, the value of `abort` is set to `false` which means pre existing requests to CloudFlare will still be made until they have concluded. If you would like to abort these requests instead, pass the abort value as `true`, like so:
+By default, the value of `abort` is set to `false` which means pre existing requests to Cloudflare will still be made until they have concluded. If you would like to abort these requests instead, pass the abort value as `true`, like so:
 
 `consumer.stop({ abort: true })`
 
