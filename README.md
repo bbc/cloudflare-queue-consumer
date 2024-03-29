@@ -49,7 +49,7 @@ consumer.start();
 
 Some implementation notes:
 
-- Pull consumers are designed to use a "short polling" approach, this means that the API from CloudFlare will respond immediately with any messages that are available, or an empty response if there are no messages available, this is different from SQS will wait an amount of time before responding with an empty response.
+- Pull consumers are designed to use a "short polling" approach, this means that the API from CloudFlare will respond immediately with any messages that are available, or an empty response if there are no messages available, this is different from SQS which will wait an amount of time before responding with an empty response.
 - `handleMessage` will send one message to the handler at a time, if you would prefer to receive multiple messages at once, use the `handleMessageBatch` method instead.
   - It is important to await any processing that you are doing to ensure that the next action only happens after your processing has completed.
   - By default, messages that are sent to the functions will be considered as processed if they return without an error.

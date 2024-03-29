@@ -5,6 +5,7 @@ import type {
   PullMessagesResponse,
   AckMessageResponse,
   UpdatableOptions,
+  StopOptions,
 } from "./types.js";
 import { assertOptions, hasMessages, validateOption } from "./validation.js";
 import { queuesClient } from "./lib/cloudflare.js";
@@ -94,7 +95,7 @@ export class Consumer extends TypedEventEmitter {
   /**
    * Stop polling the queue.
    */
-  public stop(options?: { abort?: boolean }): void {
+  public stop(options?: StopOptions): void {
     if (this.stopped) {
       logger.debug("already_stopped");
       return;

@@ -82,6 +82,19 @@ export type UpdatableOptions =
   | "batchSize"
   | "pollingWaitTimeMs";
 
+
+/**
+ * The options for the stop method.
+ */
+export interface StopOptions {
+  /**
+   * Default to `false`, if you want the stop action to also abort requests to SQS
+   * set this to `true`.
+   * @defaultvalue `false`
+   */
+  abort?: boolean;
+}
+
 export type Message = {
   body: string;
   id: string;

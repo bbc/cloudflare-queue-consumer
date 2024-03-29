@@ -1,6 +1,6 @@
 {
   "name": "@bbc/cloudflare-queue-consumer",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Build CloudFlare Queue applications without the boilerplate",
   "repository": {
     "type": "git",
