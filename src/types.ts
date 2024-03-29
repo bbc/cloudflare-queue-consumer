@@ -49,6 +49,10 @@ export type Message = {
   timestamp_ms: number;
   attempts: number;
   lease_id: string;
+  metadata: {
+    "CF-sourceMessageSource": string;
+    "CF-Content-Type": "json" | "text";
+  };
 };
 
 export type CloudFlareError = {
