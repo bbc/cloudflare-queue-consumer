@@ -4,8 +4,9 @@ import type {
   Message,
   PullMessagesResponse,
   AckMessageResponse,
+  UpdatableOptions,
 } from "./types.js";
-import { assertOptions, hasMessages } from "./validation.js";
+import { assertOptions, hasMessages, validateOption } from "./validation.js";
 import { queuesClient } from "./lib/cloudflare.js";
 import { logger } from "./logger.js";
 import {
@@ -24,8 +25,10 @@ export class Consumer extends TypedEventEmitter {
   private accountId: string;
   private queueId: string;
   private handleMessage: (message: Message) => Promise<Message | void>;
+  private handleMessageBatch: (message: Message[]) => Promise<Message[] | void>;
   private batchSize: number;
   private visibilityTimeoutMs: number;
+  private retryMessagesOnError: boolean;
   private pollingWaitTimeMs: number;
   private pollingTimeoutId: NodeJS.Timeout;
   private stopped = true;
@@ -45,8 +48,10 @@ export class Consumer extends TypedEventEmitter {
     this.accountId = options.accountId;
     this.queueId = options.queueId;
     this.handleMessage = options.handleMessage;
+    this.handleMessageBatch = options.handleMessageBatch;
     this.batchSize = options.batchSize ?? 10;
     this.visibilityTimeoutMs = options.visibilityTimeoutMs ?? 1000;
+    this.retryMessagesOnError = options.retryMessagesOnError || false;
     this.pollingWaitTimeMs = options.pollingWaitTimeMs ?? 1000;
     this.handleMessageTimeout = options.handleMessageTimeout;
     this.alwaysAcknowledge = options.alwaysAcknowledge ?? false;
@@ -205,11 +210,15 @@ export class Consumer extends TypedEventEmitter {
     }
 
     if (hasMessages(response)) {
-      await Promise.all(
-        response.result.messages.map((message: Message) =>
-          this.processMessage(message),
-        ),
-      );
+      if (this.handleMessageBatch) {
+        await this.processMessageBatch(response.result.messages);
+      } else {
+        await Promise.all(
+          response.result.messages.map((message: Message) =>
+            this.processMessage(message),
+          ),
+        );
+      }
 
       this.emit("response_processed");
     } else if (response) {
@@ -234,31 +243,49 @@ export class Consumer extends TypedEventEmitter {
       if (ackedMessage?.id === message.id) {
         // TODO: In order to conserve API reate limits, it would be better to do this
         // in a batch, rather than one at a time.
-        await this.acknowledgeMessage(
-          [
-            {
-              lease_id: message.lease_id,
-            },
-          ],
-          [],
-        );
+        await this.acknowledgeMessage([message], []);
 
         this.emit("message_processed", message);
       }
     } catch (err) {
       this.emitError(err, message);
 
-      // TODO: In order to conserve API reate limits, it would be better to do this
-      // in a batch, rather than one at a time.
-      await this.acknowledgeMessage(
-        [],
-        [
-          {
-            lease_id: message.lease_id,
-            delay_seconds: this.retryMessageDelay,
-          },
-        ],
-      );
+      if (this.retryMessagesOnError) {
+        // TODO: In order to conserve API reate limits, it would be better to do this
+        // in a batch, rather than one at a time.
+        await this.acknowledgeMessage([], [message]);
+      }
+    }
+  }
+
+  /**
+   * Process a batch of messages from the SQS queue.
+   * @param messages The messages that were delivered from SQS
+   */
+  private async processMessageBatch(messages: Message[]): Promise<void> {
+    try {
+      messages.forEach((message: Message): void => {
+        this.emit("message_received", message);
+      });
+
+      // TODO: Invesitgate if we can do heartbear checks here like SQS Consumer
+      // https://github.com/bbc/sqs-consumer/blob/main/src/consumer.ts#L375
+
+      const ackedMessages: Message[] = await this.executeBatchHandler(messages);
+
+      if (ackedMessages?.length > 0) {
+        await this.acknowledgeMessage(ackedMessages, []);
+
+        ackedMessages.forEach((message: Message): void => {
+          this.emit("message_processed", message);
+        });
+      }
+    } catch (err) {
+      this.emit("error", err, messages);
+
+      if (this.retryMessagesOnError) {
+        await this.acknowledgeMessage([], messages);
+      }
     }
   }
 
@@ -307,24 +334,45 @@ export class Consumer extends TypedEventEmitter {
   }
 
   /**
-   * Change the visibility timeout on a message
-   * @param message The message to change the value of
-   * @param timeout The new timeout that should be set
+   * Execute the application's message batch handler
+   * @param messages The messages that should be forwarded from the SQS queue
+   */
+  private async executeBatchHandler(messages: Message[]): Promise<Message[]> {
+    try {
+      const result: void | Message[] = await this.handleMessageBatch(messages);
+
+      return !this.alwaysAcknowledge && result instanceof Object
+        ? result
+        : messages;
+    } catch (err) {
+      if (err instanceof Error) {
+        throw toStandardError(
+          err,
+          `Unexpected message handler failure: ${err.message}`,
+        );
+      }
+      throw err;
+    }
+  }
+
+  /**
+   * Acknowledge a message that has been processed by the consumer
+   * @param acks The message(s) to acknowledge
+   * @param retries The message(s) to retry
    */
   private async acknowledgeMessage(
-    acks: {
-      lease_id: string;
-    }[],
-    retries: {
-      lease_id: string;
-      delay_seconds: number;
-    }[],
+    acks: Message[],
+    retries: Message[],
   ): Promise<AckMessageResponse> {
     try {
       // TODO: this is pretty hacky
       // TODO: This doesn't appear to be acknowledging correctly....
-      const input = { acks, retries };
-      this.emit("acknowledging_messages", acks, retries);
+      const retriesWithDelay = retries.map((message) => ({
+        ...message,
+        delay_seconds: this.retryMessageDelay,
+      }));
+      const input = { acks, retries: retriesWithDelay };
+      this.emit("acknowledging_messages", acks, retriesWithDelay);
 
       const result = await queuesClient<AckMessageResponse>({
         ...this.fetchOptions,
@@ -348,6 +396,22 @@ export class Consumer extends TypedEventEmitter {
         toProviderError(err, `Error acknowledging messages: ${err.message}`),
       );
     }
+  }
+
+  /**
+   * Validates and then updates the provided option to the provided value.
+   * @param option The option to validate and then update
+   * @param value The value to set the provided option to
+   */
+  public updateOption(
+    option: UpdatableOptions,
+    value: ConsumerOptions[UpdatableOptions],
+  ): void {
+    validateOption(option, value, true);
+
+    this[option] = value;
+
+    this.emit("option_updated", option, value);
   }
 
   /**

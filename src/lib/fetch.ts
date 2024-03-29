@@ -1,15 +1,17 @@
+import { toProviderError, ProviderError } from "../errors.js";
+
 export function throwErrorIfResponseNotOk(response: Response): void {
   const { ok, status, statusText, url } = response;
 
   if (!ok) {
-    let error: Error;
+    const message = status
+      ? `[${status} - ${statusText}] ${url}`
+      : `[${statusText}] ${url}`;
 
-    if (status) {
-      error = new Error(`[${status} - ${statusText}] ${url}`);
-    } else {
-      error = new Error(`[${statusText}] ${url}`);
-    }
+    const error = new ProviderError(message);
+    error.code = "ResponseNotOk";
+    Object.defineProperty(error, "response", { value: response });
 
-    throw error;
+    throw toProviderError(error, message);
   }
 }

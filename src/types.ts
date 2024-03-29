@@ -14,6 +14,11 @@ export interface ConsumerOptions {
    */
   visibilityTimeoutMs?: number;
   /**
+   * If the Consumer should trigger the message(s) to be retired on
+   * @defaultvalue false
+   */
+  retryMessagesOnError?: boolean;
+  /**
    * You CloudFlare account id
    */
   accountId: string;
@@ -21,6 +26,26 @@ export interface ConsumerOptions {
    * The ID of the queue you want to receive messages from.
    */
   queueId: string;
+  /**
+   * An `async` function (or function that returns a `Promise`) to be called whenever
+   * a message is received.
+   *
+   * In the case that you need to acknowledge the message, return an object containing
+   * the MessageId that you'd like to acknowledge.
+   */
+  handleMessage?(message: Message): Promise<Message | void>;
+  /**
+   * An `async` function (or function that returns a `Promise`) to be called whenever
+   * a batch of messages is received. Similar to `handleMessage` but will receive the
+   * list of messages, not each message individually, this is preferred to reduce API
+   * rate limits.
+   *
+   * **If both are set, `handleMessageBatch` overrides `handleMessage`**.
+   *
+   * In the case that you need to ack only some of the messages, return an array with
+   * the successful messages only.
+   */
+  handleMessageBatch?(messages: Message[]): Promise<Message[] | void>;
   /**
    * Time in ms to wait for `handleMessage` to process a message before timing out.
    *
@@ -41,7 +66,21 @@ export interface ConsumerOptions {
    * @defaultvalue 10
    */
   retryMessageDelay?: number;
+  /**
+   * The duration (in milliseconds) to wait before repolling the queue.
+   * (Note: As CloudFlare uses short polling, you probably shouldn't set this too low)
+   * @defaultvalue `1000`
+   */
+  pollingWaitTimeMs?: number;
 }
+
+/**
+ * A subset of the ConsumerOptions that can be updated at runtime.
+ */
+export type UpdatableOptions =
+  | "visibilityTimeoutMs"
+  | "batchSize"
+  | "pollingWaitTimeMs";
 
 export type Message = {
   body: string;
@@ -159,4 +198,8 @@ export interface Events {
       warnings: string[];
     },
   ];
+  /**
+   * Fired when an option is updated
+   */
+  option_updated: [UpdatableOptions, ConsumerOptions[UpdatableOptions]];
 }

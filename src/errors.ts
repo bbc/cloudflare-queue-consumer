@@ -1,7 +1,10 @@
 export class ProviderError extends Error {
   stack: string;
+  code: string;
   time: Date;
   status: number;
+  statusText?: string;
+  url?: string;
 
   constructor(message: string) {
     super(message);
@@ -9,15 +12,30 @@ export class ProviderError extends Error {
   }
 }
 
+interface ErrorWithResponse extends Error {
+  code: string;
+  response?: Response;
+}
+
 /**
  * Formats a provider's error the the ProviderError type.
  * @param err The error object that was received.
  * @param message The message to send with the error.
  */
-export function toProviderError(err: Error, message: string): ProviderError {
+export function toProviderError(
+  err: ErrorWithResponse,
+  message: string,
+): ProviderError {
   const error = new ProviderError(message);
+  error.code = err.code;
   error.stack = err?.stack;
   error.time = new Date();
+
+  if (err.response) {
+    error.status = err.response.status;
+    error.statusText = err.response.statusText;
+    error.url = err.response.url;
+  }
 
   return error;
 }
