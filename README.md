@@ -67,7 +67,6 @@ Copy that token and set it as the value for an environment variable named `QUEUE
 
 You'll also find an example project in the folder `./example`, set the variables `ACCOUNT_ID` and `QUEUE_ID` and then run this with the command `pnpm dev`.
 
-
 ## API
 
 ### `Consumer.create(options)`

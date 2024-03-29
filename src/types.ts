@@ -82,7 +82,6 @@ export type UpdatableOptions =
   | "batchSize"
   | "pollingWaitTimeMs";
 
-
 /**
  * The options for the stop method.
  */

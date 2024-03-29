@@ -47,7 +47,15 @@ function assertOptions(options: ConsumerOptions): void {
   });
 
   if (options.batchSize) {
-    validateOption("batchSize", options.batchSize, false);
+    validateOption("batchSize", options.batchSize);
+  }
+
+  if (options.visibilityTimeoutMs) {
+    validateOption("visibilityTimeoutMs", options.visibilityTimeoutMs);
+  }
+
+  if (options.retryMessageDelay) {
+    validateOption("retryMessageDelay", options.retryMessageDelay);
   }
 }
 
