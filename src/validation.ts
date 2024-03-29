@@ -1,4 +1,4 @@
-import type { ConsumerOptions } from "./types.js";
+import type { ConsumerOptions, PullMessagesResponse } from "./types.js";
 
 const requiredOptions = ["accountId", "queueId", "handleMessage"];
 
@@ -38,4 +38,12 @@ function assertOptions(options: ConsumerOptions): void {
   }
 }
 
-export { assertOptions, validateOption };
+/**
+ * Determine if the response has messages in it.
+ * @param response The response from CloudFlare.
+ */
+function hasMessages(response: PullMessagesResponse): boolean {
+  return response?.result?.messages && response.result.messages.length > 0;
+}
+
+export { assertOptions, validateOption, hasMessages };

@@ -2,10 +2,40 @@
  * The options for the consumer.
  */
 export interface ConsumerOptions {
+  /**
+   * The number of messages to request from CloudFlare when polling (default `10`).
+   * @defaultvalue `10`
+   */
   batchSize: number;
+  /**
+   * The duration (in milliseconds) that the received messages are hidden from subsequent
+   * retrieve requests after being retrieved by a ReceiveMessage request.
+   * @defaultvalue 1000
+   */
   visibilityTimeoutMs: number;
+  /**
+   * You CloudFlare account id
+   */
   accountId: string;
+  /**
+   * The ID of the queue you want to receive messages from.
+   */
   queueId: string;
+  /**
+   * Time in ms to wait for `handleMessage` to process a message before timing out.
+   *
+   * Emits `timeout_error` on timeout. By default, if `handleMessage` times out,
+   * the unprocessed message returns to the end of the queue.
+   */
+  handleMessageTimeout?: number;
+  /**
+   * By default, the consumer will treat an empty object or array from either of the
+   * handlers as a acknowledgement of no messages and will not delete those messages as
+   * a result. Set this to `true` to always acknowledge all messages no matter the returned
+   * value.
+   * @defaultvalue `false`
+   */
+  alwaysAcknowledge?: boolean;
 }
 
 export type Message = {
@@ -98,4 +128,8 @@ export interface Events {
    * Fired when the consumer finally stops its work.
    */
   stopped: [];
+  /**
+   * Fired when messages are acknowledging
+   */
+  acknowledging_messages: [Message[], Message[]];
 }

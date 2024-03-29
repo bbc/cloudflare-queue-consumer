@@ -5,9 +5,16 @@ import type {
   PullMessagesResponse,
   AckMessageResponse,
 } from "./types.js";
-import { assertOptions } from "./validation.js";
+import { assertOptions, hasMessages } from "./validation.js";
 import { queuesClient } from "./lib/cloudflare.js";
 import { logger } from "./logger.js";
+import {
+  toProviderError,
+  ProviderError,
+  toStandardError,
+  toTimeoutError,
+  TimeoutError,
+} from "./errors.js";
 
 // TODO: Document how to use this in the README
 /**
@@ -23,6 +30,8 @@ export class Consumer extends TypedEventEmitter {
   private pollingTimeoutId: NodeJS.Timeout;
   private stopped = true;
   private isPolling = false;
+  private handleMessageTimeout: number;
+  private alwaysAcknowledge: number;
   public abortController: AbortController;
 
   /**
@@ -38,6 +47,8 @@ export class Consumer extends TypedEventEmitter {
     this.batchSize = options.batchSize ?? 10;
     this.visibilityTimeoutMs = options.visibilityTimeoutMs ?? 1000;
     this.pollingWaitTimeMs = options.pollingWaitTimeMs ?? 1000;
+    this.handleMessageTimeout = options.handleMessageTimeout;
+    this.alwaysAcknowledge = options.alwaysAcknowledge ?? false;
   }
 
   /**
@@ -133,74 +144,8 @@ export class Consumer extends TypedEventEmitter {
 
     // TODO: This should be moved to its own function `receiveMessage`
 
-    queuesClient<PullMessagesResponse>({
-      ...this.fetchOptions,
-      path: "messages/pull",
-      method: "POST",
-      body: {
-        batch_size: this.batchSize,
-        visibility_timeout_ms: this.visibilityTimeoutMs,
-      },
-      accountId: this.accountId,
-      queueId: this.queueId,
-    })
-      .then(async (response) => {
-        // TODO: Message handling should be moved to its own function `handleSqsResponse`
-        if (!response.success) {
-          this.emit("error", new Error("Failed to pull messages"));
-          this.isPolling = false;
-          return;
-        }
-
-        const { messages } = response.result;
-
-        if (!messages || messages.length === 0) {
-          this.emit("empty");
-          this.isPolling = false;
-          return;
-        }
-
-        // TODO: Successful and failed messages aren't working just yet, figure out a better way
-        const successfulMessages: string[] = [];
-        const failedMessages: string[] = [];
-
-        for (const message of messages) {
-          // TODO: Individual message handling should be moved to its own function `processMessage`
-          // TODO: Work out if we can do a heartbeat with CloudFlare Queues / Extend visibility timeout
-          this.emit("message_received", message);
-          try {
-            // TODO: This should be moved to its own function `executeHandler`
-            const result = await this.handleMessage(message);
-            logger.debug("message_processed", { result });
-            if (result) {
-              successfulMessages.push(message.lease_id);
-              this.emit("message_processed", message);
-            }
-          } catch (e) {
-            failedMessages.push(message.lease_id);
-            this.emit("processing_error", e, message);
-          }
-        }
-
-        // TODO: Message ack should be more like sqs-consumer, based on what's returned and if it errored
-        // TODO: This also doesn't work just yet
-        // TODO:  This should also be moved to its own function `acknowledgeMessages`
-        logger.debug("acknowledging_messages", {
-          successfulMessages,
-          failedMessages,
-        });
-
-        await queuesClient<AckMessageResponse>({
-          ...this.fetchOptions,
-          path: "messages/ack",
-          method: "POST",
-          body: { acks: successfulMessages, retries: failedMessages },
-          accountId: this.accountId,
-          queueId: this.queueId,
-        });
-
-        this.emit("response_processed");
-      })
+    this.receiveMessage()
+      .then((output: PullMessagesResponse) => this.handleQueueResponse(output))
       .then((): void => {
         if (this.pollingTimeoutId) {
           clearTimeout(this.pollingTimeoutId);
@@ -219,5 +164,179 @@ export class Consumer extends TypedEventEmitter {
       .finally((): void => {
         this.isPolling = false;
       });
+  }
+
+  /**
+   * Send a request to CloudFlare Queues to retrieve messages
+   * @param params The required params to receive messages from CloudFlare Queues
+   */
+  private async receiveMessage(): Promise<PullMessagesResponse> {
+    try {
+      const result = queuesClient<PullMessagesResponse>({
+        ...this.fetchOptions,
+        path: "messages/pull",
+        method: "POST",
+        body: {
+          batch_size: this.batchSize,
+          visibility_timeout_ms: this.visibilityTimeoutMs,
+        },
+        accountId: this.accountId,
+        queueId: this.queueId,
+      });
+
+      return result;
+    } catch (err) {
+      throw toProviderError(err, `Receive message failed: ${err.message}`);
+    }
+  }
+
+  /**
+   * Handles the response from AWS SQS, determining if we should proceed to
+   * the message handler.
+   * @param response The output from AWS SQS
+   */
+  private async handleQueueResponse(
+    response: PullMessagesResponse,
+  ): Promise<void> {
+    if (!response.success) {
+      this.emit("error", new Error("Failed to pull messages"));
+      this.isPolling = false;
+      return;
+    }
+
+    if (hasMessages(response)) {
+      await Promise.all(
+        response.result.messages.map((message: Message) =>
+          this.processMessage(message),
+        ),
+      );
+
+      this.emit("response_processed");
+    } else if (response) {
+      this.emit("empty");
+    }
+  }
+
+  /**
+   * Process a message that has been received from CloudFlare Queues. This will execute the message
+   * handler and delete the message once complete.
+   * @param message The message that was delivered from CloudFlare
+   */
+  private async processMessage(message: Message): Promise<void> {
+    try {
+      this.emit("message_received", message);
+
+      // TODO: Invesitgate if we can do heartbear checks here like SQS Consumer
+      // https://github.com/bbc/sqs-consumer/blob/main/src/consumer.ts#L339
+
+      const ackedMessage: Message = await this.executeHandler(message);
+
+      if (ackedMessage?.id === message.id) {
+        // TODO: In order to conserve API reate limits, it would be better to do this
+        // in a batch, rather than one at a time.
+        await this.acknowledgeMessage([message], []);
+
+        this.emit("message_processed", message);
+      }
+    } catch (err) {
+      this.emitError(err, message);
+
+      // TODO: In order to conserve API reate limits, it would be better to do this
+      // in a batch, rather than one at a time.
+      await this.acknowledgeMessage([], [message]);
+    }
+  }
+
+  /**
+   * Trigger the applications handleMessage function
+   * @param message The message that was received from CloudFlare
+   */
+  private async executeHandler(message: Message): Promise<Message> {
+    let handleMessageTimeoutId: NodeJS.Timeout | undefined = undefined;
+
+    try {
+      let result;
+
+      if (this.handleMessageTimeout) {
+        const pending: Promise<void> = new Promise((_, reject): void => {
+          handleMessageTimeoutId = setTimeout((): void => {
+            reject(new TimeoutError());
+          }, this.handleMessageTimeout);
+        });
+        result = await Promise.race([this.handleMessage(message), pending]);
+      } else {
+        result = await this.handleMessage(message);
+      }
+
+      return !this.alwaysAcknowledge && result instanceof Object
+        ? result
+        : message;
+    } catch (err) {
+      if (err instanceof TimeoutError) {
+        throw toTimeoutError(
+          err,
+          `Message handler timed out after ${this.handleMessageTimeout}ms: Operation timed out.`,
+        );
+      } else if (err instanceof Error) {
+        throw toStandardError(
+          err,
+          `Unexpected message handler failure: ${err.message}`,
+        );
+      }
+      throw err;
+    } finally {
+      if (handleMessageTimeoutId) {
+        clearTimeout(handleMessageTimeoutId);
+      }
+    }
+  }
+
+  /**
+   * Change the visibility timeout on a message
+   * @param message The message to change the value of
+   * @param timeout The new timeout that should be set
+   */
+  private async acknowledgeMessage(
+    acks: Message[],
+    retries: Message[],
+  ): Promise<AckMessageResponse> {
+    try {
+      // TODO: this is pretty hacky
+      // TODO: This doesn't appear to be acknowledging correctly....
+      const input = { acks, retries };
+      this.emit("acknowledging_messages", acks, retries)
+
+      return await queuesClient<AckMessageResponse>({
+        ...this.fetchOptions,
+        path: "messages/ack",
+        method: "POST",
+        body: input,
+        accountId: this.accountId,
+        queueId: this.queueId,
+      });
+    } catch (err) {
+      this.emit(
+        "error",
+        toProviderError(err, `Error acknowledging messages: ${err.message}`),
+        acks?.[0] || retries?.[0],
+      );
+    }
+  }
+
+  /**
+   * Emit one of the consumer's error events depending on the error received.
+   * @param err The error object to forward on
+   * @param message The message that the error occurred on
+   */
+  private emitError(err: Error, message?: Message): void {
+    if (!message) {
+      this.emit("error", err);
+    } else if (err.name === ProviderError.name) {
+      this.emit("error", err, message);
+    } else if (err instanceof TimeoutError) {
+      this.emit("timeout_error", err, message);
+    } else {
+      this.emit("processing_error", err, message);
+    }
   }
 }
