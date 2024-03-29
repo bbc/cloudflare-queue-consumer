@@ -126,7 +126,7 @@ export interface Events {
    */
   processing_error: [Error, Message];
   /**
-   * Fired when requests to SQS were aborted.
+   * Fired when requests to CloudFlare were aborted.
    */
   aborted: [];
   /**

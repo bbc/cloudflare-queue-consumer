@@ -10,7 +10,7 @@ export class ProviderError extends Error {
 }
 
 /**
- * Formats an AWSError the the SQSError type.
+ * Formats a provider's error the the ProviderError type.
  * @param err The error object that was received.
  * @param message The message to send with the error.
  */

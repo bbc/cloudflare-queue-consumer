@@ -38,7 +38,7 @@ This Code of Conduct applies within all community spaces, and also applies when 
 
 Instances of abusive, harassing, or otherwise unacceptable behaviour may be reported to the community leaders responsible for enforcement. All complaints will be reviewed and investigated promptly and fairly.
 
-[Project maintainers](https://github.com/bbc/sqs-consumber/blob/main/.github/CODEOWNERS) are obligated to respect the privacy and security of the reporter of any incident.
+[Project maintainers](https://github.com/bbc/cloudflare-queue-consumber/blob/main/.github/CODEOWNERS) are obligated to respect the privacy and security of the reporter of any incident.
 
 ## Enforcement Guidelines
 

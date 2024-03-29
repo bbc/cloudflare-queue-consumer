@@ -54,7 +54,7 @@ export class Consumer extends TypedEventEmitter {
   }
 
   /**
-   * Creates a new SQS consumer.
+   * Creates a new consumer.
    */
   public static create(options: ConsumerOptions): Consumer {
     return new Consumer(options);
@@ -76,7 +76,7 @@ export class Consumer extends TypedEventEmitter {
   }
 
   /**
-   * A reusable options object for sqs.send that's used to avoid duplication.
+   * A reusable options object for queue.sending that's used to avoid duplication.
    */
   private get fetchOptions(): { signal: AbortSignal } {
     return {
@@ -191,9 +191,9 @@ export class Consumer extends TypedEventEmitter {
   }
 
   /**
-   * Handles the response from AWS SQS, determining if we should proceed to
+   * Handles the response from CloudFlare, determining if we should proceed to
    * the message handler.
-   * @param response The output from AWS SQS
+   * @param response The output from CloudFlare
    */
   private async handleQueueResponse(
     response: PullMessagesResponse,
