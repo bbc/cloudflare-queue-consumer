@@ -149,4 +149,14 @@ export interface Events {
       delay_seconds: number;
     }[],
   ];
+  /**
+   * Fired when messages have been acknowledged
+   */
+  acknowledged_messages: [
+    {
+      ackCount: number;
+      retryCount: number;
+      warnings: string[];
+    },
+  ];
 }

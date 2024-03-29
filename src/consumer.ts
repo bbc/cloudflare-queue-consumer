@@ -328,7 +328,7 @@ export class Consumer extends TypedEventEmitter {
       const input = { acks, retries };
       this.emit("acknowledging_messages", acks, retries);
 
-      return await queuesClient<AckMessageResponse>({
+      const result = await queuesClient<AckMessageResponse>({
         ...this.fetchOptions,
         path: "messages/ack",
         method: "POST",
@@ -336,6 +336,14 @@ export class Consumer extends TypedEventEmitter {
         accountId: this.accountId,
         queueId: this.queueId,
       });
+
+      if (!result.success) {
+        throw new Error("Message Acknowledgement did not succeed.");
+      }
+
+      this.emit("acknowledged_messages", result.result);
+
+      return result;
     } catch (err) {
       this.emit(
         "error",
