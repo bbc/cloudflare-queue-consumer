@@ -82,7 +82,7 @@ Start polling the queue for messages.
 
 ### `consumer.stop(options)`
 
-Stop polling the queue for messages. [You can find the options definition here](https://bbc.github.io/cloudflare-queue-consumerinterfaces/StopOptions.html).
+Stop polling the queue for messages. [You can find the options definition here](https://bbc.github.io/cloudflare-queue-consumer/interfaces/StopOptions.html).
 
 By default, the value of `abort` is set to `false` which means pre existing requests to CloudFlare will still be made until they have concluded. If you would like to abort these requests instead, pass the abort value as `true`, like so:
 
