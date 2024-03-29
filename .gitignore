@@ -130,3 +130,6 @@ dist
 .pnp.*
 
 public
+
+test/reports/*
+!test/reports/.keep

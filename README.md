@@ -2,6 +2,8 @@
 
 [![NPM downloads](https://img.shields.io/npm/dm/@bbc/cloudflare-queue-consumer.svg?style=flat)](https://npmjs.org/package/@bbc/cloudflare-queue-consumer)
 [![Build Status](https://github.com/bbc/cloudflare-queue-consumer/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/bbc/cloudflare-queue-consumer/actions/workflows/test.yml)
+[![Maintainability](https://api.codeclimate.com/v1/badges/a0fcd77021e4f54ffdd4/maintainability)](https://codeclimate.com/github/bbc/cloudflare-queue-consumer/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/a0fcd77021e4f54ffdd4/test_coverage)](https://codeclimate.com/github/bbc/cloudflare-queue-consumer/test_coverage)
 
 Build CloudFlare Queues applications without the boilerplate. Just define an async function that handles the message processing.
 
