@@ -28,14 +28,28 @@ Visit [https://bbc.github.io/cloudflare-queue-consumer/](https://bbc.github.io/c
 ```js
 import { Consumer } from "cloudflare-queue-consumer";
 
-// TODO: Add example
+const consumer = new Consumer({
+  accountId: process.env.ACCOUNT_ID, // Your CloudFlare account ID
+  queueId: process.env.QUEUE_ID, // The Queue ID that you want to use.
+  handleMessage: async (message) => {
+    // Your message handling code...
+  },
+});
+
+consumer.start();
 ```
 
 TODO: Add more information
 
 ### Credentials
 
-TODO: Add more information
+In order to authenticate with the CloudFlare API, you will need to create an API token with read and write access to CloudFlare Queues, more information can be found [here](https://developers.cloudflare.com/queues/reference/pull-consumers/#create-api-tokens).
+
+Copy that token and set it as the value for an environment variable named `QUEUES_API_TOKEN`.
+
+### Example project
+
+You'll aldo find an example project in the folder `./example`, set the variables `ACCOUNT_ID` and `QUEUE_ID` and then run this with the command `pnpm dev`.
 
 ## Contributing
 

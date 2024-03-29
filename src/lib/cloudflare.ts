@@ -6,7 +6,9 @@ export function getCredentials() {
   const QUEUES_API_TOKEN = process.env.QUEUES_API_TOKEN;
 
   if (!QUEUES_API_TOKEN) {
-    throw new Error("Missing Cloudflare credentials");
+    throw new Error(
+      "Missing Cloudflare credentials, please set a QUEUES_API_TOKEN in the environment variables.",
+    );
   }
 
   return {

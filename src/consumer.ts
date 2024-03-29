@@ -68,7 +68,7 @@ export class Consumer extends TypedEventEmitter {
   private get fetchOptions(): { signal: AbortSignal } {
     return {
       // return the current abortController signal or a fresh signal that has not been aborted.
-      // This effectively defaults the signal sent to the AWS SDK to not aborted
+      // This effectively defaults the signal sent to not aborted
       signal: this.abortController?.signal || new AbortController().signal,
     };
   }
