@@ -6,13 +6,13 @@ export interface ConsumerOptions {
    * The number of messages to request from CloudFlare when polling (default `10`).
    * @defaultvalue `10`
    */
-  batchSize: number;
+  batchSize?: number;
   /**
    * The duration (in milliseconds) that the received messages are hidden from subsequent
    * retrieve requests after being retrieved by a ReceiveMessage request.
    * @defaultvalue 1000
    */
-  visibilityTimeoutMs: number;
+  visibilityTimeoutMs?: number;
   /**
    * You CloudFlare account id
    */
@@ -36,6 +36,11 @@ export interface ConsumerOptions {
    * @defaultvalue `false`
    */
   alwaysAcknowledge?: boolean;
+  /**
+   * The amount of time to delay a message for before retrying (in seconds)
+   * @defaultvalue 10
+   */
+  retryMessageDelay?: number;
 }
 
 export type Message = {
@@ -131,5 +136,13 @@ export interface Events {
   /**
    * Fired when messages are acknowledging
    */
-  acknowledging_messages: [Message[], Message[]];
+  acknowledging_messages: [
+    {
+      lease_id: string;
+    }[],
+    {
+      lease_id: string;
+      delay_seconds: number;
+    }[],
+  ];
 }

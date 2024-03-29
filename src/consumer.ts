@@ -32,6 +32,7 @@ export class Consumer extends TypedEventEmitter {
   private isPolling = false;
   private handleMessageTimeout: number;
   private alwaysAcknowledge: number;
+  private retryMessageDelay: number;
   public abortController: AbortController;
 
   /**
@@ -49,6 +50,7 @@ export class Consumer extends TypedEventEmitter {
     this.pollingWaitTimeMs = options.pollingWaitTimeMs ?? 1000;
     this.handleMessageTimeout = options.handleMessageTimeout;
     this.alwaysAcknowledge = options.alwaysAcknowledge ?? false;
+    this.retryMessageDelay = options.retryMessageDelay ?? 10;
   }
 
   /**
@@ -234,7 +236,14 @@ export class Consumer extends TypedEventEmitter {
       if (ackedMessage?.id === message.id) {
         // TODO: In order to conserve API reate limits, it would be better to do this
         // in a batch, rather than one at a time.
-        await this.acknowledgeMessage([message], []);
+        await this.acknowledgeMessage(
+          [
+            {
+              lease_id: message.lease_id,
+            },
+          ],
+          [],
+        );
 
         this.emit("message_processed", message);
       }
@@ -243,7 +252,15 @@ export class Consumer extends TypedEventEmitter {
 
       // TODO: In order to conserve API reate limits, it would be better to do this
       // in a batch, rather than one at a time.
-      await this.acknowledgeMessage([], [message]);
+      await this.acknowledgeMessage(
+        [],
+        [
+          {
+            lease_id: message.lease_id,
+            delay_seconds: this.retryMessageDelay,
+          },
+        ],
+      );
     }
   }
 
@@ -297,14 +314,19 @@ export class Consumer extends TypedEventEmitter {
    * @param timeout The new timeout that should be set
    */
   private async acknowledgeMessage(
-    acks: Message[],
-    retries: Message[],
+    acks: {
+      lease_id: string;
+    }[],
+    retries: {
+      lease_id: string;
+      delay_seconds: number;
+    }[],
   ): Promise<AckMessageResponse> {
     try {
       // TODO: this is pretty hacky
       // TODO: This doesn't appear to be acknowledging correctly....
       const input = { acks, retries };
-      this.emit("acknowledging_messages", acks, retries)
+      this.emit("acknowledging_messages", acks, retries);
 
       return await queuesClient<AckMessageResponse>({
         ...this.fetchOptions,
@@ -318,7 +340,6 @@ export class Consumer extends TypedEventEmitter {
       this.emit(
         "error",
         toProviderError(err, `Error acknowledging messages: ${err.message}`),
-        acks?.[0] || retries?.[0],
       );
     }
   }
