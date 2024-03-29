@@ -114,4 +114,4 @@ But before you get started, [please read the contributing guidelines](https://gi
 
 ## License
 
-CloudFlare Queue Consumer is distributed under the Apache License, Version 2.0, see [LICENSE](https://github.com/bbc/cloudflare-queue-consumer/blob/main/LICENSE) for more information.
+Cloudflare Queue Consumer is distributed under the Apache License, Version 2.0, see [LICENSE](https://github.com/bbc/cloudflare-queue-consumer/blob/main/LICENSE) for more information.

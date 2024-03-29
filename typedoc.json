@@ -5,7 +5,7 @@
   "searchInComments": true,
   "entryPoints": ["./src/index.ts"],
   "out": "public",
-  "name": "CloudFlare Queue Consumer",
+  "name": "Cloudflare Queue Consumer",
   "hideGenerator": true,
   "navigationLinks": {
     "GitHub": "https://github.com/bbc/cloudflare-queue-consumer"

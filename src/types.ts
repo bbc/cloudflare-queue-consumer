@@ -3,7 +3,7 @@
  */
 export interface ConsumerOptions {
   /**
-   * The number of messages to request from CloudFlare when polling (default `10`).
+   * The number of messages to request from Cloudflare when polling (default `10`).
    * @defaultvalue `10`
    */
   batchSize?: number;
@@ -19,7 +19,7 @@ export interface ConsumerOptions {
    */
   retryMessagesOnError?: boolean;
   /**
-   * You CloudFlare account id
+   * You Cloudflare account id
    */
   accountId: string;
   /**
@@ -68,7 +68,7 @@ export interface ConsumerOptions {
   retryMessageDelay?: number;
   /**
    * The duration (in milliseconds) to wait before repolling the queue.
-   * (Note: As CloudFlare uses short polling, you probably shouldn't set this too low)
+   * (Note: As Cloudflare uses short polling, you probably shouldn't set this too low)
    * @defaultvalue `1000`
    */
   pollingWaitTimeMs?: number;
@@ -177,7 +177,7 @@ export interface Events {
    */
   processing_error: [Error, Message];
   /**
-   * Fired when requests to CloudFlare were aborted.
+   * Fired when requests to Cloudflare were aborted.
    */
   aborted: [];
   /**

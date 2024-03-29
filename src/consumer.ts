@@ -172,8 +172,8 @@ export class Consumer extends TypedEventEmitter {
   }
 
   /**
-   * Send a request to CloudFlare Queues to retrieve messages
-   * @param params The required params to receive messages from CloudFlare Queues
+   * Send a request to Cloudflare Queues to retrieve messages
+   * @param params The required params to receive messages from Cloudflare Queues
    */
   private async receiveMessage(): Promise<PullMessagesResponse> {
     try {
@@ -196,9 +196,9 @@ export class Consumer extends TypedEventEmitter {
   }
 
   /**
-   * Handles the response from CloudFlare, determining if we should proceed to
+   * Handles the response from Cloudflare, determining if we should proceed to
    * the message handler.
-   * @param response The output from CloudFlare
+   * @param response The output from Cloudflare
    */
   private async handleQueueResponse(
     response: PullMessagesResponse,
@@ -227,9 +227,9 @@ export class Consumer extends TypedEventEmitter {
   }
 
   /**
-   * Process a message that has been received from CloudFlare Queues. This will execute the message
+   * Process a message that has been received from Cloudflare Queues. This will execute the message
    * handler and delete the message once complete.
-   * @param message The message that was delivered from CloudFlare
+   * @param message The message that was delivered from Cloudflare
    */
   private async processMessage(message: Message): Promise<void> {
     try {
@@ -291,7 +291,7 @@ export class Consumer extends TypedEventEmitter {
 
   /**
    * Trigger the applications handleMessage function
-   * @param message The message that was received from CloudFlare
+   * @param message The message that was received from Cloudflare
    */
   private async executeHandler(message: Message): Promise<Message> {
     let handleMessageTimeoutId: NodeJS.Timeout | undefined = undefined;

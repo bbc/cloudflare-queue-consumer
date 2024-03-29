@@ -61,7 +61,7 @@ function assertOptions(options: ConsumerOptions): void {
 
 /**
  * Determine if the response has messages in it.
- * @param response The response from CloudFlare.
+ * @param response The response from Cloudflare.
  */
 function hasMessages(response: PullMessagesResponse): boolean {
   return response?.result?.messages && response.result.messages.length > 0;
