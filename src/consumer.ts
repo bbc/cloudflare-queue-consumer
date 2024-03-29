@@ -144,8 +144,6 @@ export class Consumer extends TypedEventEmitter {
 
     const currentPollingTimeout: number = this.pollingWaitTimeMs;
 
-    // TODO: This should be moved to its own function `receiveMessage`
-
     this.receiveMessage()
       .then((output: PullMessagesResponse) => this.handleQueueResponse(output))
       .then((): void => {
