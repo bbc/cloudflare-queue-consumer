@@ -26,5 +26,5 @@ jobs:
           remote-repository-name: 'cla-signatures'
           path-to-document: 'https://bbc.github.io/cla-signatures/cla/v1/cla.html'
           branch: 'main'
-          allowlist: bot*
+          allowlist: renovate*
           custom-allsigned-prcomment: '**CLA CHECK** All Contributors have signed the CLA'
