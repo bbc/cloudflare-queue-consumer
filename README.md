@@ -26,7 +26,7 @@ Visit [https://bbc.github.io/cloudflare-queue-consumer/](https://bbc.github.io/c
 ## Usage
 
 ```js
-import { Consumer } from "cloudflare-queue-consumer";
+import { Consumer } from "@bbc/cloudflare-queue-consumer";
 
 const consumer = new Consumer({
   accountId: process.env.ACCOUNT_ID, // Your Cloudflare account ID
