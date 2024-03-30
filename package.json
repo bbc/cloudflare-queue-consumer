@@ -43,7 +43,7 @@
     "format:check": "prettier --check \"**/*.{js,json,jsx,md,ts,tsx,html}\"",
     "test:unit": "node --import tsx --test ./test/unit/*.test.ts",
     "test": "pnpm run test:unit && pnpm run lint && pnpm run format:check",
-    "lcov": "node --import tsx --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=test/reports/lcov.info ./test/unit/*.test.ts",
+    "lcov": "node --import tsx --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage/lcov.info ./test/unit/*.test.ts",
     "generate-docs": "typedoc",
     "dev": "DEBUG=cloudflare-queue-consumer tsx ./example/index.ts"
   },
