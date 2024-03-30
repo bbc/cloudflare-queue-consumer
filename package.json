@@ -49,10 +49,14 @@
   },
   "devDependencies": {
     "@types/node": "^20.11.25",
+    "@types/sinon": "^17.0.3",
+    "chai": "^5.1.0",
     "eslint": "^8.57.0",
     "eslint-config-iplayer": "^9.2.0",
     "eslint-config-prettier": "^9.1.0",
+    "p-event": "^6.0.1",
     "prettier": "^3.2.5",
+    "sinon": "^17.0.1",
     "tsx": "^4.7.1",
     "typedoc": "^0.25.12",
     "typescript": "^5.4.2"

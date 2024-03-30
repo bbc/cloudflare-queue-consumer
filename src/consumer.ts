@@ -26,6 +26,8 @@ export class Consumer extends TypedEventEmitter {
   private queueId: string;
   private handleMessage: (message: Message) => Promise<Message | void>;
   private handleMessageBatch: (message: Message[]) => Promise<Message[] | void>;
+  private preReceiveMessageCallback?: () => Promise<void>;
+  private postReceiveMessageCallback?: () => Promise<void>;
   private batchSize: number;
   private visibilityTimeoutMs: number;
   private retryMessagesOnError: boolean;
@@ -36,6 +38,7 @@ export class Consumer extends TypedEventEmitter {
   private handleMessageTimeout: number;
   private alwaysAcknowledge: number;
   private retryMessageDelay: number;
+  private shouldDeleteMessages: boolean;
   public abortController: AbortController;
 
   /**
@@ -49,6 +52,8 @@ export class Consumer extends TypedEventEmitter {
     this.queueId = options.queueId;
     this.handleMessage = options.handleMessage;
     this.handleMessageBatch = options.handleMessageBatch;
+    this.preReceiveMessageCallback = options.preReceiveMessageCallback;
+    this.postReceiveMessageCallback = options.postReceiveMessageCallback;
     this.batchSize = options.batchSize ?? 10;
     this.visibilityTimeoutMs = options.visibilityTimeoutMs ?? 1000;
     this.retryMessagesOnError = options.retryMessagesOnError || false;
@@ -56,6 +61,7 @@ export class Consumer extends TypedEventEmitter {
     this.handleMessageTimeout = options.handleMessageTimeout;
     this.alwaysAcknowledge = options.alwaysAcknowledge ?? false;
     this.retryMessageDelay = options.retryMessageDelay ?? 10;
+    this.shouldDeleteMessages = options.shouldDeleteMessages ?? true;
   }
 
   /**
@@ -177,6 +183,10 @@ export class Consumer extends TypedEventEmitter {
    */
   private async receiveMessage(): Promise<PullMessagesResponse> {
     try {
+      if (this.preReceiveMessageCallback) {
+        await this.preReceiveMessageCallback();
+      }
+
       const result = queuesClient<PullMessagesResponse>({
         ...this.fetchOptions,
         path: "messages/pull",
@@ -188,6 +198,10 @@ export class Consumer extends TypedEventEmitter {
         accountId: this.accountId,
         queueId: this.queueId,
       });
+
+      if (this.postReceiveMessageCallback) {
+        await this.postReceiveMessageCallback();
+      }
 
       return result;
     } catch (err) {
@@ -241,9 +255,11 @@ export class Consumer extends TypedEventEmitter {
       const ackedMessage: Message = await this.executeHandler(message);
 
       if (ackedMessage?.id === message.id) {
-        // TODO: In order to conserve API reate limits, it would be better to do this
-        // in a batch, rather than one at a time.
-        await this.acknowledgeMessage([message], []);
+        if (this.shouldDeleteMessages) {
+          // TODO: In order to conserve API reate limits, it would be better to do this
+          // in a batch, rather than one at a time.
+          await this.acknowledgeMessage([message], []);
+        }
 
         this.emit("message_processed", message);
       }
@@ -274,7 +290,9 @@ export class Consumer extends TypedEventEmitter {
       const ackedMessages: Message[] = await this.executeBatchHandler(messages);
 
       if (ackedMessages?.length > 0) {
-        await this.acknowledgeMessage(ackedMessages, []);
+        if (this.shouldDeleteMessages) {
+          await this.acknowledgeMessage(ackedMessages, []);
+        }
 
         ackedMessages.forEach((message: Message): void => {
           this.emit("message_processed", message);
