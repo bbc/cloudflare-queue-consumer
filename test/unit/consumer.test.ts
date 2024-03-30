@@ -192,26 +192,26 @@ describe("Consumer", () => {
   });
 
   describe(".start", () => {
-    // TODO: Implement tests for the .start method
+    // https://github.com/bbc/cloudflare-queue-consumer/pull/18
   });
 
   describe(".stop", () => {
-    // TODO: Implement tests for the .stop method
+    // https://github.com/bbc/cloudflare-queue-consumer/pull/18
   });
 
   describe(".status", () => {
-    // TODO: Implement tests for the .status method
+    // https://github.com/bbc/cloudflare-queue-consumer/pull/18
   });
 
   describe(".updateOption", () => {
-    // TODO: Implement tests for the .updateOption method
+    // https://github.com/bbc/cloudflare-queue-consumer/pull/18
   });
 
   describe("Event Listeners", () => {
-    // TODO: Implement tests for the event listeners
+    // https://github.com/bbc/cloudflare-queue-consumer/pull/18
   });
 
   describe("Logger", () => {
-    // TODO: Implement tests for the logger
+    // https://github.com/bbc/cloudflare-queue-consumer/pull/18
   });
 });

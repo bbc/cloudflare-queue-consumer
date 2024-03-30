@@ -167,8 +167,8 @@ export class Consumer extends TypedEventEmitter {
         );
       })
       .catch((err): void => {
-        // TODO: Adjust the error handling here
-        // TODO: Add an extension to the polling timeout if auth error
+        // This error handling should be expanded and improved to handle auth timeouts
+        // https://github.com/bbc/cloudflare-queue-consumer/issues/19
         this.emit("error", err);
         setTimeout(() => this.poll(), this.pollingWaitTimeMs);
       })
@@ -249,15 +249,15 @@ export class Consumer extends TypedEventEmitter {
     try {
       this.emit("message_received", message);
 
-      // TODO: Invesitgate if we can do heartbear checks here like SQS Consumer
-      // https://github.com/bbc/sqs-consumer/blob/main/src/consumer.ts#L339
+      // At the moment, we don't extend timeouts on a heartbeat
+      // https://github.com/bbc/cloudflare-queue-consumer/issues/20
 
       const ackedMessage: Message = await this.executeHandler(message);
 
       if (ackedMessage?.id === message.id) {
         if (this.shouldDeleteMessages) {
-          // TODO: In order to conserve API reate limits, it would be better to do this
-          // in a batch, rather than one at a time.
+          // We should probably batch these up to reduce API rate limits
+          // https://github.com/bbc/cloudflare-queue-consumer/issues/21
           await this.acknowledgeMessage([message], []);
         }
 
@@ -267,8 +267,8 @@ export class Consumer extends TypedEventEmitter {
       this.emitError(err, message);
 
       if (this.retryMessagesOnError) {
-        // TODO: In order to conserve API reate limits, it would be better to do this
-        // in a batch, rather than one at a time.
+        // We should probably batch these up to reduce API rate limits
+        // https://github.com/bbc/cloudflare-queue-consumer/issues/21
         await this.acknowledgeMessage([], [message]);
       }
     }
@@ -284,8 +284,8 @@ export class Consumer extends TypedEventEmitter {
         this.emit("message_received", message);
       });
 
-      // TODO: Invesitgate if we can do heartbear checks here like SQS Consumer
-      // https://github.com/bbc/sqs-consumer/blob/main/src/consumer.ts#L375
+      // At the moment, we don't extend timeouts on a heartbeat
+      // https://github.com/bbc/cloudflare-queue-consumer/issues/20
 
       const ackedMessages: Message[] = await this.executeBatchHandler(messages);
 
@@ -383,7 +383,8 @@ export class Consumer extends TypedEventEmitter {
     retries: Message[],
   ): Promise<AckMessageResponse> {
     try {
-      // TODO: this is pretty hacky, is there a better way to do this?
+      // This is pretty hacky, is there a better way to do this?
+      // https://github.com/bbc/cloudflare-queue-consumer/issues/22
       const retriesWithDelay = retries.map((message) => ({
         ...message,
         delay_seconds: this.retryMessageDelay,

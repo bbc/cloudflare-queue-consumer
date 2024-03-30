@@ -24,47 +24,28 @@
     "replacements:all"
   ],
   "rangeStrategy": "update-lockfile",
-  "supportPolicy": [
-    "lts_latest"
-  ],
+  "supportPolicy": ["lts_latest"],
   "dependencyDashboardAutoclose": true,
   "platformAutomerge": true,
   "vulnerabilityAlerts": {
-    "labels": [
-      "security"
-    ],
+    "labels": ["security"],
     "automerge": true
   },
   "stabilityDays": 3,
   "packageRules": [
     {
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "labels": [
-        "dependencies"
-      ]
+      "matchUpdateTypes": ["major"],
+      "labels": ["dependencies"]
     },
     {
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "pin",
-        "digest"
-      ],
-      "labels": [
-        "dependencies"
-      ],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "labels": ["dependencies"],
       "automerge": true
     },
     {
       "groupName": "docker",
-      "matchDatasources": [
-        "docker"
-      ],
-      "labels": [
-        "dependencies"
-      ],
+      "matchDatasources": ["docker"],
+      "labels": ["dependencies"],
       "automerge": true
     }
   ]
