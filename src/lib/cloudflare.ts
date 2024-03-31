@@ -1,3 +1,4 @@
+import { ProviderError } from "../errors.js";
 import { throwErrorIfResponseNotOk } from "./fetch.js";
 
 const CLOUDFLARE_HOST = "https://api.cloudflare.com/client/v4";
@@ -26,18 +27,22 @@ export async function queuesClient<T = unknown>({
 }): Promise<T> {
   const { QUEUES_API_TOKEN } = getCredentials();
 
-  const response = await fetch(
-    `${CLOUDFLARE_HOST}/accounts/${accountId}/queues/${queueId}/${path}`,
-    {
-      method,
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${QUEUES_API_TOKEN}`,
-      },
-      body: JSON.stringify(body),
-      signal,
+  const url = `${CLOUDFLARE_HOST}/accounts/${accountId}/queues/${queueId}/${path}`;
+  const options = {
+    method,
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${QUEUES_API_TOKEN}`,
     },
-  );
+    body: JSON.stringify(body),
+    signal,
+  };
+
+  const response = await fetch(url, options);
+
+  if (!response) {
+    throw new ProviderError("No response from Cloudflare Queues API");
+  }
 
   throwErrorIfResponseNotOk(response);
 
