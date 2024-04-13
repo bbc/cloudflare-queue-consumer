@@ -1,0 +1,11 @@
+{
+  "errors": [],
+  "messages": [],
+  "result": {
+    "ackCount": 1,
+    "retryCount": 0,
+    "warnings": []
+  },
+  "success": true,
+  "result_info": {}
+}

@@ -1,0 +1,4 @@
+{
+  "batch_size": 10,
+  "visibility_timeout_ms": 1000
+}

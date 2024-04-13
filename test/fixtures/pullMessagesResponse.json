@@ -1,0 +1,21 @@
+{
+  "errors": {},
+  "messages": [],
+  "result": {
+    "messages": [
+      {
+        "body": "body",
+        "id": "123",
+        "timestamp_ms": 1234567890,
+        "attempts": 1,
+        "lease_id": "lease-id",
+        "metadata": {
+          "CF-sourceMessageSource": "test",
+          "CF-Content-Type": "text"
+        }
+      }
+    ]
+  },
+  "success": true,
+  "result_info": {}
+}
