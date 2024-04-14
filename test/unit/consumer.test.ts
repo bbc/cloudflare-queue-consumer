@@ -7,6 +7,7 @@ import { pEvent } from "p-event";
 import nock from "nock";
 
 import { Consumer } from "../../src/consumer";
+import { logger } from "../../src/logger";
 
 import pullMessagesResponse from "../fixtures/pullMessagesResponse.json";
 import ackMessagesResponse from "../fixtures/ackMessagesResponse.json";
@@ -536,26 +537,585 @@ describe("Consumer", () => {
         "Unexpected message handler failure: unexpected parsing error",
       );
     });
-    // https://github.com/bbc/cloudflare-queue-consumer/pull/18
+
+    it.todo(
+      "acknowledges the message if handleMessage returns void",
+      async () => {
+        mockPullRequest({});
+        const mockedAckRequest = mockAckRequest({});
+
+        consumer = new Consumer({
+          accountId: ACCOUNT_ID,
+          queueId: QUEUE_ID,
+          handleMessage: async () => {},
+        });
+
+        consumer.start();
+        await pEvent(consumer, "message_processed");
+        consumer.stop();
+
+        expect(mockedAckRequest).to.have.been.requestedWith({
+          acks: [pullMessagesResponse.result.messages[0].id],
+          retries: [],
+        });
+      },
+    );
+
+    it.todo(
+      "acknowledges the message if handleMessage returns a message with the same ID",
+      async () => {
+        mockPullRequest({});
+        const mockedAckRequest = mockAckRequest({});
+
+        consumer = new Consumer({
+          accountId: ACCOUNT_ID,
+          queueId: QUEUE_ID,
+          handleMessage: async () => {
+            return {
+              MessageId: pullMessagesResponse.result.messages[0].id,
+            };
+          },
+        });
+
+        consumer.start();
+        await pEvent(consumer, "message_processed");
+        consumer.stop();
+
+        expect(mockedAckRequest).to.have.been.requestedWith({
+          acks: [pullMessagesResponse.result.messages[0].id],
+          retries: [],
+        });
+      },
+    );
+
+    it("does not acknowledge the message if handleMessage returns an empty object", async () => {
+      mockPullRequest({});
+      const mockedAckRequest = mockAckRequest({});
+
+      consumer = new Consumer({
+        accountId: ACCOUNT_ID,
+        queueId: QUEUE_ID,
+        handleMessage: async () => {
+          return {};
+        },
+      });
+
+      consumer.start();
+      await pEvent(consumer, "response_processed");
+      consumer.stop();
+
+      expect(mockedAckRequest).to.not.have.been.requested;
+    });
+
+    it("does not acknowledge the message if handleMessage returns a different ID", async () => {
+      mockPullRequest({});
+      const mockedAckRequest = mockAckRequest({});
+
+      consumer = new Consumer({
+        accountId: ACCOUNT_ID,
+        queueId: QUEUE_ID,
+        handleMessage: async () => {
+          return {
+            MessageId: "143",
+          };
+        },
+      });
+
+      consumer.start();
+      await pEvent(consumer, "response_processed");
+      consumer.stop();
+
+      expect(mockedAckRequest).to.not.have.been.requested;
+    });
+
+    it("acknowledges the message if alwaysAcknowledge is `true` and handleMessage returns an empty object", async () => {
+      mockPullRequest({});
+      const mockedAckRequest = mockAckRequest({});
+
+      consumer = new Consumer({
+        accountId: ACCOUNT_ID,
+        queueId: QUEUE_ID,
+        handleMessage: async () => {
+          return {};
+        },
+        alwaysAcknowledge: true,
+      });
+
+      consumer.start();
+      await pEvent(consumer, "response_processed");
+      consumer.stop();
+
+      expect(mockedAckRequest).to.have.been.requestedWith({
+        acks: [pullMessagesResponse.result.messages[0].id],
+        retries: [],
+      });
+    });
+
+    it("does not acknowledge if handleMessagesBatch returns an empty array", async () => {
+      mockPullRequest({});
+      const mockedAckRequest = mockAckRequest({});
+
+      consumer = new Consumer({
+        accountId: ACCOUNT_ID,
+        queueId: QUEUE_ID,
+        handleMessageBatch: async () => [],
+        batchSize: 2,
+      });
+
+      consumer.start();
+      await pEvent(consumer, "response_processed");
+      consumer.stop();
+
+      expect(mockedAckRequest).to.not.have.been.requested;
+    });
+
+    // TODO: Batch needs more messages to properly validate these
+
+    it.todo(
+      "acknowledges the messages if alwaysAcknowledge is `true` and handleMessagesBatch returns an empty array",
+      async () => {
+        mockPullRequest({});
+        const mockedAckRequest = mockAckRequest({});
+
+        consumer = new Consumer({
+          accountId: ACCOUNT_ID,
+          queueId: QUEUE_ID,
+          handleMessageBatch: async () => [],
+          batchSize: 2,
+          alwaysAcknowledge: true,
+        });
+
+        consumer.start();
+        await pEvent(consumer, "response_processed");
+        consumer.stop();
+
+        expect(mockedAckRequest).to.have.been.requestedWith({
+          acks: [pullMessagesResponse.result.messages[0].id],
+          retries: [],
+        });
+      },
+    );
+
+    it.todo(
+      "acknowledges all messages if handleMessageBatch returns void",
+      async () => {
+        mockPullRequest({});
+        const mockedAckRequest = mockAckRequest({});
+
+        consumer = new Consumer({
+          accountId: ACCOUNT_ID,
+          queueId: QUEUE_ID,
+          handleMessageBatch: async () => {},
+          batchSize: 2,
+        });
+
+        consumer.start();
+        await pEvent(consumer, "response_processed");
+        consumer.stop();
+
+        expect(mockedAckRequest).to.have.been.requestedWith({
+          acks: [pullMessagesResponse.result.messages[0].id],
+          retries: [],
+        });
+      },
+    );
+
+    it.todo(
+      "acknowledges only returned messages if handleMessagesBatch returns an array",
+      async () => {
+        mockPullRequest({});
+        const mockedAckRequest = mockAckRequest({});
+
+        consumer = new Consumer({
+          accountId: ACCOUNT_ID,
+          queueId: QUEUE_ID,
+          handleMessageBatch: async () => [
+            { MessageId: "123", ReceiptHandle: "receipt-handle" },
+          ],
+          batchSize: 2,
+        });
+
+        consumer.start();
+        await pEvent(consumer, "response_processed");
+        consumer.stop();
+
+        expect(mockedAckRequest).to.have.been.requestedWith({
+          acks: [pullMessagesResponse.result.messages[0].id],
+          retries: [],
+        });
+      },
+    );
+
+    // TODO: End requirement for more messages
+
+    it.todo("it retries the message on error", async () => {});
+
+    it.todo(
+      "it retries the message on error with a custom retryMessageDelay",
+      async () => {},
+    );
+
+    it.todo("it retries multiple messages on error", async () => {});
+
+    // TODO: There are a few error cases to handle here, also test batch and non batch
+    // TODO: Errors from the pull and ack requests
+    // TODO: Errors from the handler
+    // TODO: Non standard errors from handler
+    // TODO: Non staandard exceptions from handler
+    // TODO: Timeout errors
+    // TODO: processing_error
+    it.todo("it emits an error event when an error occurs", async () => {});
+
+    it("fires a message_received event when a message is received", async () => {
+      mockPullRequest({});
+      mockAckRequest({});
+
+      const handleMessageReceived = sandbox.stub().returns(null);
+      consumer.on("message_received", handleMessageReceived);
+
+      consumer.start();
+      await pEvent(consumer, "message_received");
+      consumer.stop();
+
+      sandbox.assert.calledWith(
+        handleMessageReceived,
+        pullMessagesResponse.result.messages[0],
+      );
+    });
+
+    it("fires a message_processed event when a message is processed", async () => {
+      mockPullRequest({});
+      mockAckRequest({});
+
+      const handleMessageProcessed = sandbox.stub().returns(null);
+      consumer.on("message_processed", handleMessageProcessed);
+
+      consumer.start();
+      await pEvent(consumer, "message_processed");
+      consumer.stop();
+
+      sandbox.assert.calledWith(
+        handleMessageProcessed,
+        pullMessagesResponse.result.messages[0],
+      );
+    });
+
+    it.todo(
+      "Waits before re polling when an authentication error occurs",
+      async () => {},
+    );
+
+    it.todo("Waits before re polling when a 403 error occurs", async () => {});
+
+    it.todo(
+      "Wait before re polling when a polling timeout is set",
+      async () => {},
+    );
   });
 
   describe(".stop", () => {
-    // https://github.com/bbc/cloudflare-queue-consumer/pull/18
+    beforeEach(() => {
+      mockPullRequest({});
+      mockAckRequest({});
+    });
+
+    it("stops the consumer polling for messages", async () => {
+      const handleStop = sandbox.stub().returns(null);
+
+      consumer.on("stopped", handleStop);
+
+      consumer.start();
+      consumer.stop();
+
+      await clock.runAllAsync();
+
+      sandbox.assert.calledOnce(handleStop);
+      sandbox.assert.calledOnce(handleMessage);
+    });
+
+    it("clears the polling timeout when stopped", async () => {
+      sinon.spy(clock, "clearTimeout");
+
+      consumer.start();
+      await clock.tickAsync(0);
+      consumer.stop();
+
+      await clock.runAllAsync();
+
+      sinon.assert.calledTwice(clock.clearTimeout);
+    });
+
+    it("fires a stopped event only once when stopped multiple times", async () => {
+      const handleStop = sandbox.stub().returns(null);
+
+      consumer.on("stopped", handleStop);
+
+      consumer.start();
+      consumer.stop();
+      consumer.stop();
+      consumer.stop();
+      await clock.runAllAsync();
+
+      sandbox.assert.calledOnce(handleStop);
+    });
+
+    it("fires a stopped event a second time if started and stopped twice", async () => {
+      const handleStop = sandbox.stub().returns(null);
+
+      consumer.on("stopped", handleStop);
+
+      consumer.start();
+      consumer.stop();
+      consumer.start();
+      consumer.stop();
+      await clock.runAllAsync();
+
+      sandbox.assert.calledTwice(handleStop);
+    });
+
+    it("aborts requests when the abort param is true", async () => {
+      const handleStop = sandbox.stub().returns(null);
+      const handleAbort = sandbox.stub().returns(null);
+
+      consumer.on("stopped", handleStop);
+      consumer.on("aborted", handleAbort);
+
+      consumer.start();
+      consumer.stop({ abort: true });
+
+      await clock.runAllAsync();
+
+      assert.isTrue(consumer.abortController.signal.aborted);
+      sandbox.assert.calledOnce(handleMessage);
+      sandbox.assert.calledOnce(handleAbort);
+      sandbox.assert.calledOnce(handleStop);
+    });
   });
 
   describe(".status", () => {
-    // https://github.com/bbc/cloudflare-queue-consumer/pull/18
+    beforeEach(() => {
+      mockPullRequest({});
+      mockAckRequest({});
+    });
+
+    it("returns the defaults before the consumer is started", () => {
+      assert.isFalse(consumer.status.isRunning);
+      assert.isFalse(consumer.status.isPolling);
+    });
+
+    it("returns true for `isRunning` if the consumer has not been stopped", () => {
+      consumer.start();
+      assert.isTrue(consumer.status.isRunning);
+      consumer.stop();
+    });
+
+    it("returns false for `isRunning` if the consumer has been stopped", () => {
+      consumer.start();
+      consumer.stop();
+      assert.isFalse(consumer.status.isRunning);
+    });
+
+    it("returns true for `isPolling` if the consumer is polling for messages", async () => {
+      consumer = new Consumer({
+        accountId: ACCOUNT_ID,
+        queueId: QUEUE_ID,
+        handleMessage: () => new Promise((resolve) => setTimeout(resolve, 20)),
+      });
+
+      consumer.start();
+      await Promise.all([clock.tickAsync(1)]);
+      assert.isTrue(consumer.status.isPolling);
+      consumer.stop();
+      assert.isTrue(consumer.status.isPolling);
+      await Promise.all([clock.tickAsync(21)]);
+      assert.isFalse(consumer.status.isPolling);
+    });
   });
 
   describe(".updateOption", () => {
-    // https://github.com/bbc/cloudflare-queue-consumer/pull/18
+    beforeEach(() => {
+      mockPullRequest({});
+      mockAckRequest({});
+    });
+
+    it("updates the visibilityTimeoutMs option and emits an event", () => {
+      const optionUpdatedListener = sandbox.stub();
+      consumer.on("option_updated", optionUpdatedListener);
+
+      consumer.updateOption("visibilityTimeoutMs", 45);
+
+      assert.equal(consumer.visibilityTimeoutMs, 45);
+
+      sandbox.assert.calledWithMatch(
+        optionUpdatedListener,
+        "visibilityTimeoutMs",
+        45,
+      );
+    });
+
+    it("does not update the visibilityTimeoutMs if the value is more than 43200000", () => {
+      const optionUpdatedListener = sandbox.stub();
+      consumer.on("option_updated", optionUpdatedListener);
+
+      assert.throws(() => {
+        consumer.updateOption("visibilityTimeoutMs", 43200000);
+      }, "visibilityTimeoutMs must be less than 43200000");
+
+      assert.equal(consumer.visibilityTimeoutMs, 1);
+
+      sandbox.assert.notCalled(optionUpdatedListener);
+    });
+
+    it("updates the batchSize option and emits an event", () => {
+      const optionUpdatedListener = sandbox.stub();
+      consumer.on("option_updated", optionUpdatedListener);
+
+      consumer.updateOption("batchSize", 45);
+
+      assert.equal(consumer.batchSize, 45);
+
+      sandbox.assert.calledWithMatch(optionUpdatedListener, "batchSize", 45);
+    });
+
+    it("does not update the batchSize if the value is less than 1", () => {
+      const optionUpdatedListener = sandbox.stub();
+      consumer.on("option_updated", optionUpdatedListener);
+
+      assert.throws(() => {
+        consumer.updateOption("batchSize", 0);
+      }, "batchSize must be between 1 and 100");
+
+      assert.equal(consumer.batchSize, 1);
+
+      sandbox.assert.notCalled(optionUpdatedListener);
+    });
+
+    it("does not update the batchSize if the value is more than 100", () => {
+      const optionUpdatedListener = sandbox.stub();
+      consumer.on("option_updated", optionUpdatedListener);
+
+      assert.throws(() => {
+        consumer.updateOption("batchSize", 101);
+      }, "batchSize must be between 1 and 100");
+
+      assert.equal(consumer.batchSize, 1);
+
+      sandbox.assert.notCalled(optionUpdatedListener);
+    });
+
+    it("updates the retryMessageDelay option and emits an event", () => {
+      const optionUpdatedListener = sandbox.stub();
+      consumer.on("option_updated", optionUpdatedListener);
+
+      consumer.updateOption("retryMessageDelay", 45);
+
+      assert.equal(consumer.retryMessageDelay, 45);
+
+      sandbox.assert.calledWithMatch(
+        optionUpdatedListener,
+        "retryMessageDelay",
+        45,
+      );
+    });
+
+    it("does not update the retryMessageDelay if the value is more than 42300", () => {
+      const optionUpdatedListener = sandbox.stub();
+      consumer.on("option_updated", optionUpdatedListener);
+
+      assert.throws(() => {
+        consumer.updateOption("retryMessageDelay", 42300);
+      }, "retryMessageDelay must be less than 42300");
+
+      assert.equal(consumer.retryMessageDelay, 1);
+
+      sandbox.assert.notCalled(optionUpdatedListener);
+    });
+
+    it("updates the pollingWaitTimeMs option and emits an event", () => {
+      const optionUpdatedListener = sandbox.stub();
+      consumer.on("option_updated", optionUpdatedListener);
+
+      consumer.updateOption("pollingWaitTimeMs", 45);
+
+      assert.equal(consumer.pollingWaitTimeMs, 45);
+
+      sandbox.assert.calledWithMatch(
+        optionUpdatedListener,
+        "pollingWaitTimeMs",
+        45,
+      );
+    });
+
+    it("does not update the pollingWaitTimeMs if the value is less than 0", () => {
+      const optionUpdatedListener = sandbox.stub();
+      consumer.on("option_updated", optionUpdatedListener);
+
+      assert.throws(() => {
+        consumer.updateOption("pollingWaitTimeMs", -1);
+      }, "pollingWaitTimeMs must be greater than 0.");
+
+      assert.equal(consumer.pollingWaitTimeMs, 1);
+
+      sandbox.assert.notCalled(optionUpdatedListener);
+    });
+
+    it("throws an error for an unknown option", () => {
+      consumer = new Consumer({
+        queueId: QUEUE_ID,
+        accountId: ACCOUNT_ID,
+        handleMessage,
+        visibilityTimeout: 60,
+      });
+
+      assert.throws(() => {
+        consumer.updateOption("unknown", "value");
+      }, `The update unknown cannot be updated`);
+    });
+  });
+
+  describe("Aborting", () => {
+    beforeEach(() => {
+      mockPullRequest({});
+      mockAckRequest({});
+    });
+
+    it.todo(
+      'aborts the request when the consumer is stopped with the "abort" option',
+      async () => {},
+    );
+
+    it.todo("aborts the request with the correct handler", async () => {});
   });
 
   describe("Event Listeners", () => {
-    // https://github.com/bbc/cloudflare-queue-consumer/pull/18
+    beforeEach(() => {
+      mockPullRequest({});
+      mockAckRequest({});
+    });
+
+    it.todo("fires the event multiple times", async () => {});
+
+    it.todo("fires the events only once", async () => {});
   });
 
   describe("Logger", () => {
-    // https://github.com/bbc/cloudflare-queue-consumer/pull/18
+    beforeEach(() => {
+      mockPullRequest({});
+      mockAckRequest({});
+    });
+
+    it("logs a debug event when an event is emitted", async () => {
+      const loggerDebug = sandbox.stub(logger, "debug");
+
+      consumer.start();
+      consumer.stop();
+
+      sandbox.assert.callCount(loggerDebug, 5);
+      sandbox.assert.calledWithMatch(loggerDebug, "starting");
+      sandbox.assert.calledWithMatch(loggerDebug, "started");
+      sandbox.assert.calledWithMatch(loggerDebug, "polling");
+      sandbox.assert.calledWithMatch(loggerDebug, "stopping");
+      sandbox.assert.calledWithMatch(loggerDebug, "stopped");
+    });
   });
 });

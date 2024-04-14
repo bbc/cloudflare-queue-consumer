@@ -24,6 +24,11 @@ function validateOption(option: string, value: number, strict?: boolean): void {
         throw new Error("retryMessageDelay must be less than 42300");
       }
       break;
+    case "pollingWaitTimeMs":
+      if (value < 0) {
+        throw new Error("pollingWaitTimeMs must be greater than 0.");
+      }
+      break;
     default:
       if (strict) {
         throw new Error(`The update ${option} cannot be updated`);
