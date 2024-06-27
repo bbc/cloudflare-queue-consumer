@@ -1,3 +1,4 @@
+import { ProxyAgent } from "undici";
 import { TypedEventEmitter } from "./emitter.js";
 import type {
   ConsumerOptions,
@@ -36,6 +37,7 @@ export class Consumer extends TypedEventEmitter {
   private handleMessageTimeout: number;
   private alwaysAcknowledge: number;
   private retryMessageDelay: number;
+  private proxyUrl?: string;
   public abortController: AbortController;
 
   /**
@@ -56,6 +58,7 @@ export class Consumer extends TypedEventEmitter {
     this.handleMessageTimeout = options.handleMessageTimeout;
     this.alwaysAcknowledge = options.alwaysAcknowledge ?? false;
     this.retryMessageDelay = options.retryMessageDelay ?? 10;
+    this.proxyUrl = options.proxyUrl;
   }
 
   /**
@@ -83,11 +86,12 @@ export class Consumer extends TypedEventEmitter {
   /**
    * A reusable options object for queue.sending that's used to avoid duplication.
    */
-  private get fetchOptions(): { signal: AbortSignal } {
+  private get fetchOptions(): { signal: AbortSignal; dispatcher: ProxyAgent } {
     return {
       // return the current abortController signal or a fresh signal that has not been aborted.
       // This effectively defaults the signal sent to not aborted
       signal: this.abortController?.signal || new AbortController().signal,
+      dispatcher: this.proxyUrl ? new ProxyAgent(this.proxyUrl) : undefined,
     };
   }
 

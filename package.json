@@ -58,7 +58,8 @@
     "typescript": "^5.4.2"
   },
   "dependencies": {
-    "debug": "^4.3.4"
+    "debug": "^4.3.4",
+    "undici": "^6.19.2"
   },
   "eslintConfig": {
     "extends": [

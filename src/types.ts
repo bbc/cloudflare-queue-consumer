@@ -72,6 +72,10 @@ export interface ConsumerOptions {
    * @defaultvalue `1000`
    */
   pollingWaitTimeMs?: number;
+  /**
+   * The proxy to be used when sending HTTPS request to Cloudflare APIs.
+   */
+  proxyUrl?: string;
 }
 
 /**
