@@ -103,10 +103,10 @@ describe("Consumer", () => {
 
   afterEach(() => {
     process.env = currentProcessEnv;
-    nock.cleanAll();
-    nock.restore();
     clock.restore();
     sandbox.restore();
+    nock.cleanAll();
+    nock.restore();
   });
 
   describe("Options Validation", () => {

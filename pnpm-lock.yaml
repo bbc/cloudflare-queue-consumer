@@ -43,8 +43,8 @@ importers:
         specifier: 3.3.3
         version: 3.3.3
       sinon:
-        specifier: 19.0.2
-        version: 19.0.2
+        specifier: 17.0.1
+        version: 17.0.1
       tsx:
         specifier: 4.19.1
         version: 4.19.1
@@ -266,8 +266,8 @@ packages:
   '@sinonjs/commons@3.0.1':
     resolution: {integrity: sha512-K3mCHKQ9sVh8o1C9cxkwxaOmXoAMlDxC1mYyHrjqOWEcBjYr76t96zL2zlj5dUGZ3HSw240X1qgH3Mjf1yJWpQ==}
 
-  '@sinonjs/fake-timers@13.0.2':
-    resolution: {integrity: sha512-4Bb+oqXZTSTZ1q27Izly9lv8B9dlV61CROxPiVtywwzv5SnytJqhvYe6FclHYuXml4cd1VHPo1zd5PmTeJozvA==}
+  '@sinonjs/fake-timers@11.3.1':
+    resolution: {integrity: sha512-EVJO7nW5M/F5Tur0Rf2z/QoMo+1Ia963RiMtapiQrEWvY0iBUvADo8Beegwjpnle5BHkyHuoxSTW3jF43H1XRA==}
 
   '@sinonjs/samsam@8.0.2':
     resolution: {integrity: sha512-v46t/fwnhejRSFTGqbpn9u+LQ9xJDse10gNnPgAcxgdoCDMXj/G2asWAC/8Qs+BAZDicX+MNZouXT1A7c83kVw==}
@@ -549,8 +549,8 @@ packages:
   devlop@1.1.0:
     resolution: {integrity: sha512-RWmIqhcFf1lRYBvNmr7qTNuyCt/7/ns2jbpp1+PalgE/rDQcBT0fioSMUpJ93irlUhC5hrg4cYqe6U+0ImW0rA==}
 
-  diff@7.0.0:
-    resolution: {integrity: sha512-PJWHUb1RFevKCwaFA9RlG5tCd+FO5iRh9A8HEtkmBH2Li03iJriB6m6JIN4rGz3K3JLawI7/veA1xzRKP6ISBw==}
+  diff@5.2.0:
+    resolution: {integrity: sha512-uIFDxqpRZGZ6ThOk84hEfqWoHx2devRFvpTZcTHur85vImfaxUbTW9Ryh4CpCuDnToOP1CEtXKIgytHBPVff5A==}
     engines: {node: '>=0.3.1'}
 
   dir-glob@3.0.1:
@@ -1096,8 +1096,8 @@ packages:
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
 
-  nise@6.1.1:
-    resolution: {integrity: sha512-aMSAzLVY7LyeM60gvBS423nBmIPP+Wy7St7hsb+8/fc1HmeoHJfLO8CKse4u3BtOZvQLJghYPI2i/1WZrEj5/g==}
+  nise@5.1.9:
+    resolution: {integrity: sha512-qOnoujW4SV6e40dYxJOb3uvuoPHtmLzIk4TFo+j0jPJoC+5Z9xja5qH5JZobEPsa8+YYphMrOSwnrshEhG2qww==}
 
   nock@14.0.0-beta.5:
     resolution: {integrity: sha512-u255tf4DYvyErTlPZA9uTfXghiZZy+NflUOFONPVKZ5tP0yaHwKig28zyFOLhu8y5YcCRC+V5vDk4HHileh2iw==}
@@ -1183,9 +1183,8 @@ packages:
   path-parse@1.0.7:
     resolution: {integrity: sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==}
 
-  path-to-regexp@8.2.0:
-    resolution: {integrity: sha512-TdrF7fW9Rphjq4RjrW0Kp2AW0Ahwu9sRGTkS6bvDi0SCwZlEZYmcfDbEsTz8RVk0EHIS/Vd1bv3JhG+1xZuAyQ==}
-    engines: {node: '>=16'}
+  path-to-regexp@6.3.0:
+    resolution: {integrity: sha512-Yhpw4T9C6hPpgPeA28us07OJeqZ5EzQTkbfwuhsUg0c237RomFoETJgmp2sa3F/41gfLE6G5cqcYwznmeEeOlQ==}
 
   path-type@4.0.0:
     resolution: {integrity: sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==}
@@ -1316,8 +1315,8 @@ packages:
     resolution: {integrity: sha512-fDW/EZ6Q9RiO8eFG8Hj+7u/oW+XrPTIChwCOM2+th2A6OblDtYYIpve9m+KvI9Z4C9qSEXlaGR6bTEYHReuglA==}
     engines: {node: '>= 0.4'}
 
-  sinon@19.0.2:
-    resolution: {integrity: sha512-euuToqM+PjO4UgXeLETsfQiuoyPXlqFezr6YZDFwHR3t4qaX0fZUe1MfPMznTL5f8BWrVS89KduLdMUsxFCO6g==}
+  sinon@17.0.1:
+    resolution: {integrity: sha512-wmwE19Lie0MLT+ZYNpDymasPHUKTaZHUH/pKEubRXIzySv9Atnlw+BUMGCzWgV7b7wO+Hw6f1TEOr0IUnmU8/g==}
 
   slash@3.0.0:
     resolution: {integrity: sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==}
@@ -1653,7 +1652,7 @@ snapshots:
     dependencies:
       type-detect: 4.0.8
 
-  '@sinonjs/fake-timers@13.0.2':
+  '@sinonjs/fake-timers@11.3.1':
     dependencies:
       '@sinonjs/commons': 3.0.1
 
@@ -2007,7 +2006,7 @@ snapshots:
     dependencies:
       dequal: 2.0.3
 
-  diff@7.0.0: {}
+  diff@5.2.0: {}
 
   dir-glob@3.0.1:
     dependencies:
@@ -2705,13 +2704,13 @@ snapshots:
 
   natural-compare@1.4.0: {}
 
-  nise@6.1.1:
+  nise@5.1.9:
     dependencies:
       '@sinonjs/commons': 3.0.1
-      '@sinonjs/fake-timers': 13.0.2
+      '@sinonjs/fake-timers': 11.3.1
       '@sinonjs/text-encoding': 0.7.3
       just-extend: 6.2.0
-      path-to-regexp: 8.2.0
+      path-to-regexp: 6.3.0
 
   nock@14.0.0-beta.5:
     dependencies:
@@ -2804,7 +2803,7 @@ snapshots:
 
   path-parse@1.0.7: {}
 
-  path-to-regexp@8.2.0: {}
+  path-to-regexp@6.3.0: {}
 
   path-type@4.0.0: {}
 
@@ -2936,13 +2935,13 @@ snapshots:
       get-intrinsic: 1.2.4
       object-inspect: 1.13.1
 
-  sinon@19.0.2:
+  sinon@17.0.1:
     dependencies:
       '@sinonjs/commons': 3.0.1
-      '@sinonjs/fake-timers': 13.0.2
+      '@sinonjs/fake-timers': 11.3.1
       '@sinonjs/samsam': 8.0.2
-      diff: 7.0.0
-      nise: 6.1.1
+      diff: 5.2.0
+      nise: 5.1.9
       supports-color: 7.2.0
 
   slash@3.0.0: {}
