@@ -69,7 +69,10 @@ function assertOptions(options: ConsumerOptions): void {
  * @param response The response from Cloudflare.
  */
 function hasMessages(response: PullMessagesResponse): boolean {
-  return response?.result?.messages && response.result.messages.length > 0;
+  return (
+    Array.isArray(response?.result?.messages) &&
+    response.result.messages.length > 0
+  );
 }
 
 export { assertOptions, validateOption, hasMessages };
