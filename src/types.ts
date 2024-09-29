@@ -47,6 +47,16 @@ export interface ConsumerOptions {
    */
   handleMessageBatch?(messages: Message[]): Promise<Message[] | void>;
   /**
+   * An `async` function (or function that returns a `Promise`) to be called right
+   * before the consumer sends a receive message command.
+   */
+  preReceiveMessageCallback?(): Promise<void>;
+  /**
+   * An `async` function (or function that returns a `Promise`) to be called right
+   * after the consumer sends a receive message command.
+   */
+  postReceiveMessageCallback?(): Promise<void>;
+  /**
    * Time in ms to wait for `handleMessage` to process a message before timing out.
    *
    * Emits `timeout_error` on timeout. By default, if `handleMessage` times out,
@@ -72,6 +82,11 @@ export interface ConsumerOptions {
    * @defaultvalue `1000`
    */
   pollingWaitTimeMs?: number;
+  /**
+   * If the consumer should delete messages after they have been processed.
+   * @defaultvalue `true`
+   */
+  shouldDeleteMessages?: boolean;
 }
 
 /**

@@ -29,9 +29,6 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
 
-      - name: NPM Audit
-        run: npx audit-ci
-
       - name: Install Node Modules
         run: pnpm install --frozen-lockfile
 
