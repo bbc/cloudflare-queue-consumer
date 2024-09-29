@@ -1,4 +1,4 @@
-import { ProviderError } from "../errors.js";
+import { ProviderError } from "../utils/errors.js";
 import { throwErrorIfResponseNotOk } from "./fetch.js";
 
 const CLOUDFLARE_HOST = "https://api.cloudflare.com/client/v4";

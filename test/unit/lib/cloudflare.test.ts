@@ -4,7 +4,7 @@ import nock from "nock";
 import sinon from "sinon";
 
 import { queuesClient } from "../../../src/lib/cloudflare";
-import { ProviderError } from "../../../src/errors";
+import { ProviderError } from "../../../src/utils/errors";
 
 const CLOUDFLARE_HOST = "https://api.cloudflare.com/client/v4";
 const ACCOUNT_ID = "test-account-id";

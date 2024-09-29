@@ -1,4 +1,4 @@
-import { toProviderError, ProviderError } from "../errors.js";
+import { toProviderError, ProviderError } from "../utils/errors.js";
 
 export function throwErrorIfResponseNotOk(response: Response): void {
   if (!response?.ok) {

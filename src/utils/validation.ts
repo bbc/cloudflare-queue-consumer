@@ -1,4 +1,4 @@
-import type { ConsumerOptions, PullMessagesResponse } from "./types.js";
+import type { ConsumerOptions, PullMessagesResponse } from "../types.js";
 
 const requiredOptions = [
   "accountId",

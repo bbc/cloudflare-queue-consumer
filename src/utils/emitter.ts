@@ -1,7 +1,7 @@
 import { EventEmitter } from "node:events";
 
 import { logger } from "./logger.js";
-import type { Events } from "./types.js";
+import type { Events } from "../types.js";
 
 export class TypedEventEmitter extends EventEmitter {
   /**

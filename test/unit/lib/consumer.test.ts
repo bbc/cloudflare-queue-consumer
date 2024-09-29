@@ -7,11 +7,11 @@ import * as sinon from "sinon";
 import { pEvent } from "p-event";
 import nock from "nock";
 
-import { Consumer } from "../../src/consumer";
-import { logger } from "../../src/logger";
+import { Consumer } from "../../../src/lib/consumer";
+import { logger } from "../../../src/utils/logger";
 
-import pullMessagesResponse from "../fixtures/pullMessagesResponse.json";
-import ackMessagesResponse from "../fixtures/ackMessagesResponse.json";
+import pullMessagesResponse from "../../fixtures/pullMessagesResponse.json";
+import ackMessagesResponse from "../../fixtures/ackMessagesResponse.json";
 
 chai.use(chaiNock);
 nock.disableNetConnect();

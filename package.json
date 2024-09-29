@@ -41,7 +41,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --log-level warn --write \"**/*.{js,json,jsx,md,ts,tsx,html}\"",
     "format:check": "prettier --check \"**/*.{js,json,jsx,md,ts,tsx,html}\"",
-    "test:unit": "node --import tsx --test ./test/unit/*.test.ts --test ./test/unit/**/*.test.ts",
+    "test:unit": "node --import tsx --test ./test/unit/**/*.test.ts",
     "test:unit:watch": "node --import tsx --test --watch ./test/unit/*.test.ts",
     "test": "pnpm run test:unit && pnpm run lint && pnpm run format:check",
     "lcov": "node --import tsx --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage/lcov.info ./test/unit/*.test.ts",

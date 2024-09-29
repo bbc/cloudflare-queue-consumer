@@ -1,4 +1,4 @@
-import { TypedEventEmitter } from "./emitter.js";
+import { TypedEventEmitter } from "../utils/emitter.js";
 import type {
   ConsumerOptions,
   Message,
@@ -6,17 +6,21 @@ import type {
   AckMessageResponse,
   UpdatableOptions,
   StopOptions,
-} from "./types.js";
-import { assertOptions, hasMessages, validateOption } from "./validation.js";
-import { queuesClient } from "./lib/cloudflare.js";
-import { logger } from "./logger.js";
+} from "../types.js";
+import {
+  assertOptions,
+  hasMessages,
+  validateOption,
+} from "../utils/validation.js";
+import { queuesClient } from "./cloudflare.js";
+import { logger } from "../utils/logger.js";
 import {
   toProviderError,
   ProviderError,
   toStandardError,
   toTimeoutError,
   TimeoutError,
-} from "./errors.js";
+} from "../utils/errors.js";
 
 /**
  * [Usage](https://bbc.github.io/cloudflare-queue-consumer/index.html#usage)

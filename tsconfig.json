@@ -11,6 +11,13 @@
     "declaration": true,
     "declarationDir": "dist/types"
   },
-  "include": ["src/*"],
+  "include": [
+    "src/*",
+    "src/utils/validation.ts",
+    "src/utils/errors.ts",
+    "src/utils/emitter.ts",
+    "src/utils/logger.ts",
+    "src/lib/consumer.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }
