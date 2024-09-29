@@ -18,6 +18,22 @@ export function getCredentials() {
   };
 }
 
+function calculateDelay(attempt: number): number {
+  return Math.pow(2, attempt) * 100 + Math.random() * 100;
+}
+
+function shouldRetry(
+  error: unknown,
+  attempt: number,
+  maxRetries: number,
+): boolean {
+  return (
+    error instanceof ProviderError &&
+    error.message.includes("429") &&
+    attempt < maxRetries
+  );
+}
+
 async function exponentialBackoff<T>(
   fn: () => Promise<T>,
   maxRetries: number,
@@ -27,9 +43,9 @@ async function exponentialBackoff<T>(
     try {
       return await fn();
     } catch (error) {
-      if (error instanceof ProviderError && error.message.includes("429")) {
+      if (shouldRetry(error, attempt, maxRetries)) {
         attempt++;
-        const delay = Math.pow(2, attempt) * 100 + Math.random() * 100;
+        const delay = calculateDelay(attempt);
         await new Promise((resolve) => setTimeout(resolve, delay));
       } else {
         throw error;
