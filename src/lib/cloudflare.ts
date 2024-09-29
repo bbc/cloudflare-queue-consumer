@@ -2,6 +2,7 @@ import { ProviderError } from "../errors.js";
 import { throwErrorIfResponseNotOk } from "./fetch.js";
 
 const CLOUDFLARE_HOST = "https://api.cloudflare.com/client/v4";
+const MAX_RETRIES = 5;
 
 export function getCredentials() {
   const QUEUES_API_TOKEN = process.env.QUEUES_API_TOKEN;
@@ -17,6 +18,27 @@ export function getCredentials() {
   };
 }
 
+async function exponentialBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries: number,
+): Promise<T> {
+  let attempt = 0;
+  while (attempt < maxRetries) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (error instanceof ProviderError && error.message.includes("429")) {
+        attempt++;
+        const delay = Math.pow(2, attempt) * 100 + Math.random() * 100;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      } else {
+        throw error;
+      }
+    }
+  }
+  throw new ProviderError("Max retries reached");
+}
+
 export async function queuesClient<T = unknown>({
   path,
   method,
@@ -24,6 +46,13 @@ export async function queuesClient<T = unknown>({
   accountId,
   queueId,
   signal,
+}: {
+  path: string;
+  method: string;
+  body?: Record<string, unknown>;
+  accountId: string;
+  queueId: string;
+  signal?: AbortSignal;
 }): Promise<T> {
   const { QUEUES_API_TOKEN } = getCredentials();
 
@@ -38,15 +67,23 @@ export async function queuesClient<T = unknown>({
     signal,
   };
 
-  const response = await fetch(url, options);
+  async function fetchWithBackoff() {
+    const response = await fetch(url, options);
 
-  if (!response) {
-    throw new ProviderError("No response from Cloudflare Queues API");
+    if (!response) {
+      throw new ProviderError("No response from Cloudflare Queues API");
+    }
+
+    if (response.status === 429) {
+      throw new ProviderError("429 Too Many Requests");
+    }
+
+    throwErrorIfResponseNotOk(response);
+
+    const data = (await response.json()) as T;
+
+    return data;
   }
 
-  throwErrorIfResponseNotOk(response);
-
-  const data = (await response.json()) as T;
-
-  return data;
+  return exponentialBackoff(fetchWithBackoff, MAX_RETRIES);
 }
